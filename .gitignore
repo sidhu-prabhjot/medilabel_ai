@@ -2,4 +2,24 @@
 medical-ai-venv/
 
 #datasets used to train
+datasets/# Python virtual environment
+medical-ai-venv/
+
+# Datasets used to train
 datasets/
+
+# Environment variables
+.env
+
+# Checkpoints and trained model weights (too large for GitHub)
+ml_models/model_training/qa_chat_trained/
+ml_models/model_training/qa_chat_qlora/
+
+# Model weight file types (common)
+*.pt
+*.safetensors
+*.bin
+*.ckpt
+
+# VSCode settings (optional)
+.vscode/
