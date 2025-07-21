@@ -44,7 +44,7 @@ def test_qa_chat(prompt):
     print("💬 Generating response...\n")
     outputs = pipe(
         prompt,
-        max_new_tokens=1000,
+        max_new_tokens=500,
         do_sample=True,
         temperature=0.7,
         top_k=50,

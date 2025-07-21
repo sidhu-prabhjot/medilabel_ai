@@ -66,21 +66,37 @@ def get_best_text_from_rotations(processed_img, verbose=True):
     return best_text.strip(), best_angle
 
 def image_to_text(img_detection_results, verbose=True):
-    extracted_text_results = []
+    # Define all expected labels upfront
+    medicine_label_data = {
+        "medicine_name": None,
+        "composition": None,
+        "uses": None,
+        "dosage_amount": None,
+        "dosage_form": None,
+        "quantity": None
+    }
 
+    if verbose:
+        print(f"img_detection_results: {img_detection_results}")
+
+    # Process available detection results and populate actual data
     for img_data in img_detection_results:
-        raw_crop = img_data["cropped_img_obj"]
-        processed = preprocess_for_ocr(raw_crop)
+        attribute = img_data["label_attribute"].lower()
 
-        tesseract_text, best_angle = get_best_text_from_rotations(processed, verbose=verbose)
+        if attribute in medicine_label_data:  # Prevent invalid keys
+            confidence = img_data.get("confidence", 0.0)
+            bounding_box = img_data.get("bounding_box", None)
+            raw_crop_img = img_data["cropped_img_obj"]
+            processed_img = preprocess_for_ocr(raw_crop_img)
 
-        extracted_text_results.append({
-            "label": img_data["label_attribute"],
-            "text": tesseract_text,
-            "angle": best_angle
-        })
+            tesseract_text, best_angle = get_best_text_from_rotations(processed_img, verbose=verbose)
 
-        if verbose:
-            print(f"Detected text for '{img_data['label_attribute']}' (angle {best_angle}°):\n{tesseract_text}\n{'-'*40}")
+            medicine_label_data[attribute] = {
+                "text": tesseract_text,
+                "confidence": confidence,
+                "bounding_box": bounding_box,
+                "angle": best_angle
+            }
 
-    return extracted_text_results
+    return medicine_label_data
+
