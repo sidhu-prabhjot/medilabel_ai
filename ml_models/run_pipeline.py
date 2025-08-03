@@ -11,28 +11,29 @@ medicine_label_dict = image_to_text(img_detection_results)
 prompt_parts = []
 
 if medicine_label_dict.get("medicine_name") and medicine_label_dict["medicine_name"].get("text"):
-    prompt_parts.append(f"The medicine is called **{medicine_label_dict['medicine_name']['text']}**.")
+    prompt_parts.append(f"Medicine name: {medicine_label_dict['medicine_name']['text']}")
 
 if medicine_label_dict.get("composition") and medicine_label_dict["composition"].get("text"):
-    prompt_parts.append(f"It contains the following active ingredients: {medicine_label_dict['composition']['text']}.")
+    prompt_parts.append(f"Active ingredients: {medicine_label_dict['composition']['text']}")
 
 if medicine_label_dict.get("uses") and medicine_label_dict["uses"].get("text"):
-    prompt_parts.append(f"It is typically used for: {medicine_label_dict['uses']['text']}.")
+    prompt_parts.append(f"Uses: {medicine_label_dict['uses']['text']}")
 
 if medicine_label_dict.get("dosage_amount") and medicine_label_dict["dosage_amount"].get("text"):
-    prompt_parts.append(f"The recommended dosage amount is: {medicine_label_dict['dosage_amount']['text']}.")
+    prompt_parts.append(f"Recommended dosage: {medicine_label_dict['dosage_amount']['text']}")
 
 if medicine_label_dict.get("dosage_form") and medicine_label_dict["dosage_form"].get("text"):
-    prompt_parts.append(f"It comes in the form of: {medicine_label_dict['dosage_form']['text']}.")
+    prompt_parts.append(f"Form: {medicine_label_dict['dosage_form']['text']}")
 
 if medicine_label_dict.get("quantity") and medicine_label_dict["quantity"].get("text"):
-    prompt_parts.append(f"The quantity provided is: {medicine_label_dict['quantity']['text']}.")
+    prompt_parts.append(f"Quantity: {medicine_label_dict['quantity']['text']}")
 
-context = " ".join(prompt_parts)
+context = "\n".join(prompt_parts)
 
-prompt = f"This is the context of the medicine: {context} Please summarize in plain English and in a casual tone: what is this medicine used for?"
+# Natural, chat-friendly prompt
+prompt = (
+    f"Here's some information from a medicine label:\n\n{context}\n\n"
+    f"Could you explain in plain, friendly language what this medicine is used for and anything else someone should know?"
+)
 
 test_qa_chat(prompt)
-
-
-

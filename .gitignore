@@ -1,25 +1,30 @@
-#Python 
+# Python cache and environment
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+
+# Virtual environment
 medical-ai-venv/
 
-#datasets used to train
-datasets/# Python virtual environment
-medical-ai-venv/
-
-# Datasets used to train
+# Datasets (too large / not suitable for git)
 datasets/
 
-# Environment variables
+# Temp directories and images
+temp_url_image/
+
+# Environment variables and secrets
 .env
 
-# Checkpoints and trained model weights (too large for GitHub)
-ml_models/model_training/qa_chat_trained/
-ml_models/model_training/qa_chat_qlora/
-
-# Model weight file types (common)
+# Model weights and checkpoints
 *.pt
 *.safetensors
 *.bin
 *.ckpt
+
+ml_models/model_training/qa_chat_trained/
+ml_models/model_training/qa_chat_qlora/
 
 # VSCode settings (optional)
 .vscode/
