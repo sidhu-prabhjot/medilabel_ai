@@ -1,39 +1,60 @@
-from object_detection import run_ocr
-from image_to_text import image_to_text
-from model_training.qa_chat_test import test_qa_chat
+from .object_detection import run_ocr
+from .image_to_text import image_to_text
+from .natural_language_processing import analyze_label
+from .errors import NoDetectionsError, ConvertToTextError, GenerateResponseError
+import os
 
-img_path = input("Enter path to a medical label image: ")
+def process_medical_label(img_path: str):
+    """
+    Process a medical label image and return the AI-generated response.
+    
+    Args:
+        img_path (str): Path to the medical label image.
+        
+    Returns:
+        str: The AI-generated response based on the label analysis.
+        
+    Raises:
+        FileNotFoundError: If the image file does not exist.
+        NoDetectionsError: If OCR detects no information.
+        ConvertToTextError: If conversion from image detections to text fails.
+        GenerateResponseError: If the NLP model fails to generate a response.
+        Exception: For other unexpected errors.
+    """
+    if not os.path.isfile(img_path):
+        raise FileNotFoundError(f"The image file does not exist: {img_path}")
 
-img_detection_results = run_ocr(img_path)
-medicine_label_dict = image_to_text(img_detection_results)
+    # Run OCR to detect text boxes or information from image
+    img_detection_results = run_ocr(img_path)
+    if not img_detection_results:
+        raise NoDetectionsError("Unable to detect any information from the image")
 
-# Build dynamic prompt
-prompt_parts = []
+    # Convert detected information to text strings
+    medicine_label_dict = image_to_text(img_detection_results)
+    if not medicine_label_dict:
+        raise ConvertToTextError("Unable to convert text in the image to strings")
 
-if medicine_label_dict.get("medicine_name") and medicine_label_dict["medicine_name"].get("text"):
-    prompt_parts.append(f"Medicine name: {medicine_label_dict['medicine_name']['text']}")
+    # Analyze the text label using NLP model
+    response = analyze_label(medicine_label_dict)
+    if not response:
+        raise GenerateResponseError("AI model was unable to generate a response")
 
-if medicine_label_dict.get("composition") and medicine_label_dict["composition"].get("text"):
-    prompt_parts.append(f"Active ingredients: {medicine_label_dict['composition']['text']}")
+    return response
 
-if medicine_label_dict.get("uses") and medicine_label_dict["uses"].get("text"):
-    prompt_parts.append(f"Uses: {medicine_label_dict['uses']['text']}")
 
-if medicine_label_dict.get("dosage_amount") and medicine_label_dict["dosage_amount"].get("text"):
-    prompt_parts.append(f"Recommended dosage: {medicine_label_dict['dosage_amount']['text']}")
+# For testing or CLI usage, you can keep this part or remove it later
+if __name__ == "__main__":
+    import sys
 
-if medicine_label_dict.get("dosage_form") and medicine_label_dict["dosage_form"].get("text"):
-    prompt_parts.append(f"Form: {medicine_label_dict['dosage_form']['text']}")
+    if len(sys.argv) != 2:
+        print("Usage: python your_script.py /path/to/image.jpg")
+        sys.exit(1)
 
-if medicine_label_dict.get("quantity") and medicine_label_dict["quantity"].get("text"):
-    prompt_parts.append(f"Quantity: {medicine_label_dict['quantity']['text']}")
+    input_path = sys.argv[1]
 
-context = "\n".join(prompt_parts)
-
-# Natural, chat-friendly prompt
-prompt = (
-    f"Here's some information from a medicine label:\n\n{context}\n\n"
-    f"Could you explain in plain, friendly language what this medicine is used for and anything else someone should know?"
-)
-
-test_qa_chat(prompt)
+    try:
+        result = process_medical_label(input_path)
+        print("Analysis result:")
+        print(result)
+    except Exception as e:
+        print(f"Error: {e}")

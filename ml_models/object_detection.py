@@ -38,7 +38,7 @@ def run_ocr(img_path):
 
     CLIENT = InferenceHTTPClient(
         api_url="https://detect.roboflow.com",
-        api_key=api_key
+        api_key="VBDhflHgLu72kReVh3KR"
     )
 
     # Load and deskew original image

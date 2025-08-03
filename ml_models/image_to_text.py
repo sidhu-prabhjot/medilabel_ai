@@ -33,7 +33,7 @@ def get_best_text_from_rotations(processed_img, verbose=True):
     best_score = -1
     best_angle = 0
 
-    for angle in [0, 90, 180, 270]:
+    for angle in [0, 45, 90, 135, 180, 225, 270]:
         rotated = processed_img.rotate(angle, expand=True)
         data = pytesseract.image_to_data(
             rotated,
@@ -65,6 +65,25 @@ def get_best_text_from_rotations(processed_img, verbose=True):
 
     return best_text.strip(), best_angle
 
+def clean_text(text):
+    return re.sub(r'[\u2018\u2019\u201C\u201D]', "'", text).strip().replace("\n", " ")
+
+def correct_common_ocr_mistakes(text):
+    # Replace common OCR number-letter mixups
+    substitutions = [
+        (r'(?<!\w)[IiLl][2Zz]', '12'),            # I2 / l2 / L2 → 12
+        (r'\bmgm\b', 'mg'),                       # mgm → mg
+        (r'\b([0-9]+)[oO](mg|mcg|g)\b', r'\1 0\2'),# 10mg misread as 1omg → 10mg
+        (r'\b([Oo])(?=\d)', '0'),                 # O500mg → 0500mg
+    ]
+
+    for pattern, replacement in substitutions:
+        text = re.sub(pattern, replacement, text)
+
+    return text
+
+
+
 def image_to_text(img_detection_results, verbose=True):
     # Define all expected labels upfront
     medicine_label_data = {
@@ -91,8 +110,11 @@ def image_to_text(img_detection_results, verbose=True):
 
             tesseract_text, best_angle = get_best_text_from_rotations(processed_img, verbose=verbose)
 
+            cleaned_text = clean_text(tesseract_text)
+            corrected_text = correct_common_ocr_mistakes(cleaned_text)
+
             medicine_label_data[attribute] = {
-                "text": tesseract_text,
+                "text": corrected_text,
                 "confidence": confidence,
                 "bounding_box": bounding_box,
                 "angle": best_angle

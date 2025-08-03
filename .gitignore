@@ -12,7 +12,7 @@ medical-ai-venv/
 datasets/
 
 # Temp directories and images
-temp_url_image/
+temp_url_images/
 
 # Environment variables and secrets
 .env
