@@ -16,10 +16,11 @@ def is_low_quality_text(text):
 
 def preprocess_for_ocr(pil_img):
     img = pil_img.convert("L")  # Grayscale
-    img = img.resize((img.width * 2, img.height * 2), Image.Resampling.LANCZOS)
+    img = ImageOps.exif_transpose(img)  # Handle EXIF rotation
+    img = img.resize((img.width * 3, img.height * 3), Image.Resampling.LANCZOS)
     img = ImageOps.autocontrast(img)
-    img = img.filter(ImageFilter.SHARPEN)
-    img = img.filter(ImageFilter.MedianFilter(size=3))  # Light denoising
+    img = img.filter(ImageFilter.MedianFilter(size=3))  # Denoise
+    img = ImageOps.invert(img) if np.mean(np.array(img)) > 127 else img  # Optional invert for light text
     return img
 
 def run_easyocr_fallback(image):
@@ -69,7 +70,6 @@ def clean_text(text):
     return re.sub(r'[\u2018\u2019\u201C\u201D]', "'", text).strip().replace("\n", " ")
 
 def correct_common_ocr_mistakes(text):
-    # Replace common OCR number-letter mixups
     substitutions = [
         (r'(?<!\w)[IiLl][2Zz]', '12'),            # I2 / l2 / L2 → 12
         (r'\bmgm\b', 'mg'),                       # mgm → mg
@@ -82,10 +82,7 @@ def correct_common_ocr_mistakes(text):
 
     return text
 
-
-
 def image_to_text(img_detection_results, verbose=True):
-    # Define all expected labels upfront
     medicine_label_data = {
         "medicine_name": None,
         "composition": None,
@@ -98,11 +95,10 @@ def image_to_text(img_detection_results, verbose=True):
     if verbose:
         print(f"img_detection_results: {img_detection_results}")
 
-    # Process available detection results and populate actual data
     for img_data in img_detection_results:
         attribute = img_data["label_attribute"].lower()
 
-        if attribute in medicine_label_data:  # Prevent invalid keys
+        if attribute in medicine_label_data:
             confidence = img_data.get("confidence", 0.0)
             bounding_box = img_data.get("bounding_box", None)
             raw_crop_img = img_data["cropped_img_obj"]
@@ -113,12 +109,26 @@ def image_to_text(img_detection_results, verbose=True):
             cleaned_text = clean_text(tesseract_text)
             corrected_text = correct_common_ocr_mistakes(cleaned_text)
 
-            medicine_label_data[attribute] = {
-                "text": corrected_text,
-                "confidence": confidence,
-                "bounding_box": bounding_box,
-                "angle": best_angle
-            }
+            if corrected_text:
+                previous_entry = medicine_label_data[attribute]
+                should_set = (
+                    previous_entry is None or
+                    confidence > previous_entry["confidence"]
+                )
+
+                if should_set:
+                    medicine_label_data[attribute] = {
+                        "text": corrected_text,
+                        "confidence": confidence,
+                        "bounding_box": bounding_box,
+                        "angle": best_angle
+                    }
+                    if verbose:
+                        print(f"✅ Set {attribute} = '{corrected_text}' (conf={confidence:.2f}, angle={best_angle})")
+
+    if verbose:
+        print("\n📦 Final extracted label data:")
+        for key, value in medicine_label_data.items():
+            print(f" - {key}: {value}")
 
     return medicine_label_data
-

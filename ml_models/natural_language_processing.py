@@ -86,22 +86,39 @@ def analyze_label(medicine_label_dict):
 
     if medicine_label_dict.get("medicine_name") and medicine_label_dict["medicine_name"].get("text"):
         prompt_parts.append(f"Medicine name: {medicine_label_dict['medicine_name']['text']}")
+    else: prompt_parts.append("")
 
     if medicine_label_dict.get("composition") and medicine_label_dict["composition"].get("text"):
         prompt_parts.append(f"Active ingredients: {medicine_label_dict['composition']['text']}")
+    else: prompt_parts.append("")
 
     if medicine_label_dict.get("uses") and medicine_label_dict["uses"].get("text"):
         prompt_parts.append(f"Uses: {medicine_label_dict['uses']['text']}")
+    else: prompt_parts.append("")
 
     if medicine_label_dict.get("dosage_amount") and medicine_label_dict["dosage_amount"].get("text"):
         prompt_parts.append(f"Recommended dosage: {medicine_label_dict['dosage_amount']['text']}")
+    else: prompt_parts.append("")
 
     if medicine_label_dict.get("dosage_form") and medicine_label_dict["dosage_form"].get("text"):
         prompt_parts.append(f"Form: {medicine_label_dict['dosage_form']['text']}")
+    else: prompt_parts.append("")
 
     if medicine_label_dict.get("quantity") and medicine_label_dict["quantity"].get("text"):
         prompt_parts.append(f"Quantity: {medicine_label_dict['quantity']['text']}")
+    else: prompt_parts.append("")
 
     context = "\n".join(prompt_parts)
     prompt = build_chat_prompt(context)
-    return generate_response(prompt)
+    generated_response = generate_response(prompt)
+    response_dict = {
+        "medicine_name": prompt_parts[0],
+        "composition": prompt_parts[1],
+        "uses": prompt_parts[2],
+        "dosage_amount": prompt_parts[3],
+        "dosage_form": prompt_parts[4],
+        "quantity": prompt_parts[5],
+        "generated_response": generated_response
+    }
+
+    return response_dict
