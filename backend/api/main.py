@@ -43,7 +43,7 @@ async def analyze_label_from_url(request_data: LabelPipelineRequest):
         raise HTTPException(status_code=500, detail=f"Unable to complete analysis on image: {str(e)}")
 
     return {
-        "upload_id": upload_id,
+        "upload_id": upload_idcd,
         "result": result
     }
 
