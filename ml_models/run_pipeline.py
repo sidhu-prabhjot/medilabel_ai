@@ -3,8 +3,10 @@ from .image_to_text import image_to_text
 from .natural_language_processing import analyze_label
 from .errors import NoDetectionsError, ConvertToTextError, GenerateResponseError
 import os
+from PIL import Image
+from io import BytesIO
 
-def process_medical_label(img_path: str):
+def process_medical_label(image):
     """
     Process a medical label image and return the AI-generated response.
     
@@ -21,11 +23,9 @@ def process_medical_label(img_path: str):
         GenerateResponseError: If the NLP model fails to generate a response.
         Exception: For other unexpected errors.
     """
-    if not os.path.isfile(img_path):
-        raise FileNotFoundError(f"The image file does not exist: {img_path}")
 
     # Run OCR to detect text boxes or information from image
-    img_detection_results = run_ocr(img_path)
+    img_detection_results = run_ocr(image)
     if not img_detection_results:
         raise NoDetectionsError("Unable to detect any information from the image")
 
@@ -43,18 +43,18 @@ def process_medical_label(img_path: str):
 
 
 # For testing or CLI usage, you can keep this part or remove it later
-if __name__ == "__main__":
-    import sys
+# if __name__ == "__main__":
+#     import sys
 
-    if len(sys.argv) != 2:
-        print("Usage: python your_script.py /path/to/image.jpg")
-        sys.exit(1)
+#     if len(sys.argv) != 2:
+#         print("Usage: python your_script.py /path/to/image.jpg")
+#         sys.exit(1)
 
-    input_path = sys.argv[1]
+#     input_path = sys.argv[1]
 
-    try:
-        result = process_medical_label(input_path)
-        print("Analysis result:")
-        print(result)
-    except Exception as e:
-        print(f"Error: {e}")
+#     try:
+#         result = process_medical_label(input_path)
+#         print("Analysis result:")
+#         print(result)
+#     except Exception as e:
+#         print(f"Error: {e}")

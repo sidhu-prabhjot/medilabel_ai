@@ -24,7 +24,6 @@ temp_url_images/
 *.ckpt
 
 ml_models/model_training/qa_chat_trained/
-ml_models/model_training/qa_chat_qlora/
 
 # VSCode settings (optional)
 .vscode/

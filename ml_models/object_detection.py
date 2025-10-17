@@ -32,7 +32,7 @@ def deskew_image(pil_img):
 
     return Image.fromarray(rotated)
 
-def run_ocr(img_path):
+def run_ocr(image):
     load_dotenv()
     api_key = os.getenv("ROBOFLOW_API_KEY")
 
@@ -42,18 +42,13 @@ def run_ocr(img_path):
     )
 
     # Load and deskew original image
-    original_img = Image.open(img_path)
-    deskewed_img = deskew_image(original_img)
+    deskewed_img = deskew_image(image)
 
     # Resize to match Roboflow's input size (stretched 640x640)
     resized_img = deskewed_img.resize((640, 640))
 
-    # Save temporary image for inference
-    temp_resized_path = "resized_temp_image.jpg"
-    resized_img.save(temp_resized_path)
-
     # Inference on resized + deskewed image
-    result = CLIENT.infer(temp_resized_path, model_id="medilabel_ai/1")
+    result = CLIENT.infer(resized_img, model_id="medilabel_ai/1")
 
     draw = ImageDraw.Draw(resized_img)
     formatted_result = []

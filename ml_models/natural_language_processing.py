@@ -2,7 +2,7 @@ from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer
 import torch
 
 # === CONFIGURATION ===
-MODEL_PATH = "D:\code\medilabel_ai\ml_models\model_training\qa_chat_qlora"
+MODEL_PATH = "D:\code\medilabel_ai\ml_models\model_training\qa_chat_training_qlora"
 
 def build_chat_prompt(context):
     return f"""<|system|>
@@ -24,7 +24,9 @@ Please explain:
 _pipe = None
 
 def get_pipeline():
+    print("🚀 Initializing model pipeline...")
     global _pipe
+    print(f"_pipe is None: {_pipe is None}")
     if _pipe is None:
         # === 4-BIT QUANTIZATION ===
         quant_config = BitsAndBytesConfig(
@@ -64,6 +66,7 @@ def get_pipeline():
 
 
 def generate_response(prompt):
+    print("🤖 Generating response from AI model...")
     pipe = get_pipeline()
 
     # === GENERATE RESPONSE ===

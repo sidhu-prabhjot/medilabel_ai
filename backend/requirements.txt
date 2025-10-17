@@ -1,0 +1,19 @@
+# FastAPI core
+fastapi
+uvicorn[standard]
+
+# ML / Hugging Face
+torch          # (if using PyTorch models like TrOCR, BERT)
+transformers
+datasets
+sentencepiece  # needed for some Hugging Face models
+accelerate     # better performance on GPU
+
+# OCR
+pytesseract
+Pillow
+inference_sdk
+easyocr
+
+#other
+python-multipart
