@@ -1,0 +1,41 @@
+.symptomsWrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 6px;
+  width: 100%;
+}
+
+.symptomCount {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #90ee90; /* Use a bright accent color (like light green/lime) */
+  margin-bottom: 4px;
+}
+
+.symptomList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+}
+
+.symptomItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.9rem;
+  color: #eee;
+  padding: 2px 0;
+  border-bottom: 1px solid #555;
+}
+
+.symptomName {
+  font-weight: 500;
+}
+
+.dosesLeft {
+  font-size: 0.8rem;
+  color: #eee;
+}

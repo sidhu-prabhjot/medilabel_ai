@@ -1,5 +1,5 @@
 .card {
-  background-color: #242424; /* Slightly lighter for the card background */
+  background-color: #242424;
   padding: 20px;
   border-radius: 12px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
@@ -7,22 +7,43 @@
   flex-direction: column;
   justify-content: space-between;
   min-height: 120px;
-  color: white; /* Default text color */
+  color: white;
+  overflow: hidden; /* Prevent content overflow outside rounded edges */
 }
 
 .cardTitle {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #aaaaaa; /* Lighter color for title */
+  color: #aaaaaa;
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
+/* Scrollable content section */
+.cardContent {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: 140px; /* Adjust depending on your grid height */
+  margin-bottom: 8px;
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Internet Explorer & Edge */
+}
+
+/* Optional: smooth scrollbar */
+.cardContent::-webkit-scrollbar {
+  width: 6px;
+}
+.cardContent::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
 .cardValue {
   font-size: 2rem;
   font-weight: 700;
-  color: #90ee90; /* Use a bright accent color (like light green/lime) */
+  color: #90ee90;
   margin-bottom: 4px;
 }
 
@@ -33,27 +54,31 @@
 }
 
 /* --- Card Sizing Overrides --- */
-
-/* Medium Card: Spans 2 columns on desktop (for charts) */
 @media (min-width: 1200px) {
   .cardMedium {
     grid-column: span 2;
   }
-}
-
-/* Large Card: Spans all 4 columns on desktop (for tables/detailed lists) */
-@media (min-width: 1200px) {
   .cardLarge {
     grid-column: span 4;
   }
 }
 
-/* Ensure medium/large cards still behave correctly on smaller screens */
+/* Tablet responsiveness */
 @media (max-width: 1199px) and (min-width: 600px) {
   .cardMedium {
-    grid-column: span 1; /* Reset to 1 column span on tablet */
+    grid-column: span 1;
   }
   .cardLarge {
-    grid-column: span 2; /* Spans both columns on tablet */
+    grid-column: span 2;
   }
+}
+
+.card.small .cardContent {
+  max-height: 120px;
+}
+.card.medium .cardContent {
+  max-height: 220px;
+}
+.card.large .cardContent {
+  max-height: 340px;
 }

@@ -2,7 +2,7 @@ from transformers import AutoModelForCausalLM, BitsAndBytesConfig, AutoTokenizer
 import torch
 
 # === CONFIGURATION ===
-MODEL_PATH = "D:\code\medilabel_ai\ml_models\model_training\qa_chat_training_qlora"
+MODEL_PATH = "D:/code/medilabel_ai/ml_models/model_training/qa_chat_qlora"
 
 def build_chat_prompt(context):
     return f"""<|system|>

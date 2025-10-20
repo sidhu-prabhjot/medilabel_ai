@@ -1,6 +1,8 @@
 //components
 import Card from "./src/components/Card";
 import CompletionData from "./src/components/CompletionData";
+import RefillsData from "./src/components/RefillsData";
+import SymptomsLogged from "./src/components/SymptomsLogged";
 
 //styling
 import styles from "./src/styles/Dashboard.module.css";
@@ -24,13 +26,13 @@ export default function Home() {
         />
         <Card
           title="Refills Needed"
-          value="2"
+          value={<RefillsData />}
           status="High Priority"
           size="small"
         />
         <Card
           title="Symptoms Logged"
-          value="1"
+          value={<SymptomsLogged />}
           status="Mild Headache"
           size="small"
         />

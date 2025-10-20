@@ -13,7 +13,7 @@
 
   /* Mobile Default: Single column */
   grid-template-columns: 1fr;
-  gap: 16px; /* Spacing between cards */
+  gap: 8px; /* Spacing between cards */
 }
 
 /* Tablet/Small Desktop: Two columns */
@@ -27,6 +27,6 @@
 @media (min-width: 1200px) {
   .dashboardGrid {
     grid-template-columns: repeat(4, 1fr);
-    gap: 24px; /* Larger gap on larger screens */
+    gap: 16px; /* Larger gap on larger screens */
   }
 }
