@@ -1,8 +1,10 @@
 //components
 import { PieChart } from "@mui/x-charts/PieChart";
-import styles from "../styles/CompletionData.module.css";
 
-export default function CompletionData() {
+//styling
+import styles from "../styles/PieChartDiagram.module.css";
+
+export default function PieChartDiagram() {
   return (
     <div className={styles.chartWrapper}>
       <PieChart

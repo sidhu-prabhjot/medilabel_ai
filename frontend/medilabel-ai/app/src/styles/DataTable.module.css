@@ -1,0 +1,17 @@
+.tableContainer {
+  width: 100%;
+  background-color: #1e1e1e;
+  border-radius: 12px;
+  padding: 10px;
+  box-sizing: border-box;
+  overflow-x: auto; /* horizontal scroll for small screens */
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.tableContainer::-webkit-scrollbar {
+  display: none;
+}
+.tableContainer {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}

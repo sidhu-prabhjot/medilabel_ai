@@ -1,0 +1,28 @@
+.chartContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  padding: 10px;
+  box-sizing: border-box;
+  background-color: transparent;
+  overflow-x: auto; /* enable horizontal scroll for small screens */
+}
+
+/* Hide scrollbar but keep scroll functionality */
+.chartContainer::-webkit-scrollbar {
+  display: none;
+}
+.chartContainer {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+/* Responsive tweaks */
+@media (max-width: 768px) {
+  .chartContainer {
+    padding: 6px;
+    justify-content: flex-start; /* let chart scroll horizontally if needed */
+  }
+}
