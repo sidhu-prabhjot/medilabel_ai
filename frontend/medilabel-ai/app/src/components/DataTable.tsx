@@ -66,28 +66,37 @@ export default function MedicationInventoryTable() {
         autoHeight
         sx={{
           border: "none",
-          backgroundColor: "transparent", // main grid
+          backgroundColor: "transparent",
           color: "#f5f5f5",
 
+          "& .MuiDataGrid-root": {
+            backgroundColor: "transparent",
+          },
+
           "& .MuiDataGrid-cell": {
-            borderBottom: "1px solid rgba(255,255,255,0.1)",
-            backgroundColor: "transparent", // transparent rows
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+            backgroundColor: "transparent",
           },
 
           "& .MuiDataGrid-columnHeaders": {
-            backgroundColor: "transparent", // transparent header
-            color: "#90ee90",
+            backgroundColor: "#ecf39e !important",
+            color: "#171717",
             fontWeight: 600,
-            borderBottom: "1px solid rgba(255,255,255,0.2)",
+            borderBottom: "1px solid rgba(255,255,255,0.08)",
+          },
+
+          "& .MuiDataGrid-columnHeader": {
+            backgroundColor: "#ecf39e !important",
           },
 
           "& .MuiDataGrid-footerContainer": {
-            backgroundColor: "transparent", // transparent footer
-            borderTop: "1px solid rgba(255,255,255,0.2)",
+            backgrounColor: "transparent",
+            borderTop: "1px solid rgba(255,255,255,0.08)",
           },
 
+          // remove hover background so nothing adds a background color
           "& .MuiDataGrid-row:hover": {
-            backgroundColor: "rgba(144, 238, 144, 0.1)",
+            backgroundColor: "transparent",
           },
 
           "& .MuiDataGrid-virtualScroller": {
@@ -96,7 +105,24 @@ export default function MedicationInventoryTable() {
           },
 
           "& .MuiDataGrid-selectedRowCount": {
-            color: "#90ee90",
+            color: "#f5f5f5",
+          },
+
+          "& .MuiTablePagination-root": {
+            color: "#f5f5f5",
+          },
+
+          "& .MuiTablePagination-displayedRows, & .MuiTablePagination-selectLabel":
+            {
+              color: "#f5f5f5",
+            },
+
+          "& .MuiIconButton-root": {
+            color: "#f5f5f5",
+          },
+
+          "& .Mui-disabled": {
+            color: "#f5f5f5 !important",
           },
         }}
       />
