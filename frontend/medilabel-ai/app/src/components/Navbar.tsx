@@ -84,13 +84,13 @@ export default function Navbar() {
           className={styles.desktopMenuBox}
           sx={{ display: { xs: "none", md: "flex" } }}
         >
-          <Button color="inherit" startIcon={<HomeIcon />}>
+          <Button color="inherit" startIcon={<HomeIcon />} href="/">
             Home
           </Button>
-          <Button color="inherit" startIcon={<SearchIcon />}>
+          <Button color="inherit" startIcon={<SearchIcon />} href="/">
             Analyze
           </Button>
-          <Button color="inherit" startIcon={<InfoIcon />}>
+          <Button color="inherit" startIcon={<InfoIcon />} href="/">
             About
           </Button>
         </Box>

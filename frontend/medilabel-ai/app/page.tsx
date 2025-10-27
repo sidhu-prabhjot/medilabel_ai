@@ -30,28 +30,27 @@ export default function Home() {
           value={<PieChartDiagram />}
           status="🔥 On Track"
           size="small"
-          href="/dashboard/adherence"
+          href="./dashboard/adherence"
         />
         <Card
           title="Next Dose"
           value="10:00 AM"
           status="Aspirin"
           size="small"
-          href="/dashboard/next-dose"
         />
         <Card
           title="Refills Needed"
           value={<RefillsData />}
           status="High Priority"
           size="small"
-          href="/dashboard/refills"
+          href="./dashboard/refills"
         />
         <Card
           title="Symptoms Logged"
           value={<SymptomsLogged />}
           status="Mild Headache"
           size="small"
-          href="/dashboard/symptoms"
+          href="./dashboard/symptoms"
         />
 
         <Card
@@ -59,7 +58,7 @@ export default function Home() {
           value={<BarChartDiagram />}
           status="Line Chart"
           size="medium"
-          href="/dashboard/adherence-trend"
+          href="./dashboard/adherence"
         />
 
         <Card
@@ -67,7 +66,7 @@ export default function Home() {
           value={<DataTable />}
           status="Pill Count Breakdown"
           size="medium"
-          href="/dashboard/inventory"
+          href="./dashboard/inventory"
         />
 
         <Card
@@ -75,7 +74,7 @@ export default function Home() {
           value={<DataTable />}
           status="Recent Activity"
           size="large"
-          href="/dashboard/history"
+          href="./dashboard/history"
         />
       </div>
     </div>
