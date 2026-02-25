@@ -5,7 +5,7 @@ create a venv in backend directory and start it using:
 
 example: `.\backend\medical-ai-venv\Scripts\activate`
 
-boot up the backend api locally using:
+boot up the backend api locally using (from root):
 `uvicorn backend.api.main:app --reload`
 
 authorize to use the api for dev by:
@@ -14,3 +14,7 @@ authorize to use the api for dev by:
 2. Clicking the auth button on the swagger ui
 3. entering the user id
    (Now you are authorized for that session)
+
+TO START FRONTEND REACT APP:
+
+go to medilabel-ai directory in frontend directory and run: `npm run dev`

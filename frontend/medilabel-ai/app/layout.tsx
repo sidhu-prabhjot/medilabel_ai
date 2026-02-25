@@ -1,5 +1,4 @@
 import "./globals.css";
-import NavbarWrapper from "./src/components/NavbarWrapper";
 
 export const metadata = {
   title: "MediLabel AI",
@@ -14,10 +13,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="min-h-screen bg-background">
-        <NavbarWrapper />
-        <main className="pt-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {children}
-        </main>
+        <p>Hello World</p>
       </body>
     </html>
   );
