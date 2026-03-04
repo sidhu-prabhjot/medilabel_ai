@@ -36,11 +36,6 @@ def run_ocr(image):
     load_dotenv()
     api_key = os.getenv("ROBOFLOW_API_KEY")
 
-    CLIENT = InferenceHTTPClient(
-        api_url="https://detect.roboflow.com",
-        api_key="VBDhflHgLu72kReVh3KR"
-    )
-
     # Load and deskew original image
     deskewed_img = deskew_image(image)
 
