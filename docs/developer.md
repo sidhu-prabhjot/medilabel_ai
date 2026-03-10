@@ -50,7 +50,7 @@ You are now authorized for that session.
 
 ### Start the React App
 
-Navigate to the app directory inside `frontend/` and start the dev server:
+Navigate to the app directory inside `frontend/medilabel-ai` and start the dev server:
 
 ```bash
 cd frontend/medilabel-ai

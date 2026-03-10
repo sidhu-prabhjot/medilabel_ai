@@ -19,7 +19,7 @@ export default function Home() {
       console.log(data);
       const token = data.access_token;
       localStorage.setItem("token", token);
-      router.push("/auth/signup");
+      router.push("/dashboard");
     } catch (err: any) {
       setError(err.response?.data?.detail || "Login failed");
     }
