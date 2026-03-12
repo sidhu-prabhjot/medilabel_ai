@@ -6,6 +6,7 @@ annotated-types==0.7.0
 anyio==4.9.0
 attrs==25.3.0
 backoff==2.2.1
+bitsandbytes==0.46.1
 cachetools==6.2.4
 certifi==2025.6.15
 cffi==2.0.0
@@ -116,6 +117,8 @@ sympy==1.13.3
 tenacity==9.1.2
 tifffile==2025.6.11
 tokenizers==0.21.2
+torchaudio==2.7.1+cu126
+torchvision==0.22.1+cu126
 tqdm==4.67.1
 transformers==4.53.1
 trl==0.19.1
