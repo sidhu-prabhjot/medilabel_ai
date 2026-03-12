@@ -2,8 +2,8 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from uuid import UUID
 
-from backend.api.auth.jwt import decode_access_token
-from backend.api.db.supabase import supabase
+from api.auth.jwt import decode_access_token
+from api.db.supabase import supabase
 
 security = HTTPBearer()
 

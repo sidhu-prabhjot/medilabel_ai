@@ -2,11 +2,11 @@ from decimal import Decimal
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.auth.auth import get_current_user
-from backend.api.schemas.workout_routine_record import WorkoutRoutineCreate, WorkoutRoutineUpdate
-from backend.api.schemas.routine_exercise_record import RoutineExerciseRecordCreate, RoutineExerciseRecordUpdate
-from backend.api.schemas.routine_set_record import RoutineSetRecordCreate, RoutineSetRecordUpdate
+from api.db.supabase import supabase
+from api.auth.auth import get_current_user
+from api.schemas.workout_routine_record import WorkoutRoutineCreate, WorkoutRoutineUpdate
+from api.schemas.routine_exercise_record import RoutineExerciseRecordCreate, RoutineExerciseRecordUpdate
+from api.schemas.routine_set_record import RoutineSetRecordCreate, RoutineSetRecordUpdate
 
 router = APIRouter(prefix="/api")
 

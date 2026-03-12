@@ -2,10 +2,10 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPBearer
 
-from backend.api.auth.hash import hash_password, verify_password
-from backend.api.auth.jwt import create_access_token, decode_access_token
-from backend.api.db.supabase import supabase
-from backend.api.schemas.user import UserCreate, UserLogin, Token
+from api.auth.hash import hash_password, verify_password
+from api.auth.jwt import create_access_token, decode_access_token
+from api.db.supabase import supabase
+from api.schemas.user import UserCreate, UserLogin, Token
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 

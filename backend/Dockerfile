@@ -3,11 +3,6 @@ FROM python:3.11-slim
 WORKDIR /app
 
 COPY requirements.txt .
-
-# Install CPU-only torch first from PyTorch's index
-RUN pip install --no-cache-dir torch==2.7.1 --index-url https://download.pytorch.org/whl/cpu
-
-# Install remaining dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .

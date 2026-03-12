@@ -28,7 +28,7 @@ From the **project root**, activate your venv:
 With the venv active, run the following from the **project root**:
 
 ```bash
-uvicorn backend.api.main:app --reload
+uvicorn api.main:app --reload
 ```
 
 The API will be available locally with hot-reloading enabled.

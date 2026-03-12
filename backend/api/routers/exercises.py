@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.schemas.exercise_record import ExerciseRecordCreate
+from api.db.supabase import supabase
+from api.schemas.exercise_record import ExerciseRecordCreate
 
 router = APIRouter(prefix="/api")
 

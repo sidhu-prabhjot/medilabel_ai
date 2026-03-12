@@ -1,9 +1,9 @@
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.auth.auth import get_current_user
-from backend.api.schemas.plan_record import (
+from api.db.supabase import supabase
+from api.auth.auth import get_current_user
+from api.schemas.plan_record import (
     WorkoutPlanCreate,
     WorkoutPlanUpdate,
     PlanRoutineDayCreate,

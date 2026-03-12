@@ -3,9 +3,9 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.auth.auth import get_current_user
-from backend.api.schemas.body_metric_record import BodyMetricRecordCreate, BodyMetricRecordUpdate
+from api.db.supabase import supabase
+from api.auth.auth import get_current_user
+from api.schemas.body_metric_record import BodyMetricRecordCreate, BodyMetricRecordUpdate
 
 router = APIRouter(prefix="/api")
 

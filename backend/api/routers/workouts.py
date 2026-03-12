@@ -3,11 +3,11 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.schemas.workout_record import WorkoutRecordCreate, WorkoutRecordUpdate
-from backend.api.schemas.workout_exercise_record import WorkoutExerciseRecordCreate, WorkoutExerciseRecordUpdate
-from backend.api.schemas.set_record import SetRecordCreate, SetRecordUpdate
-from backend.api.auth.auth import get_current_user
+from api.db.supabase import supabase
+from api.schemas.workout_record import WorkoutRecordCreate, WorkoutRecordUpdate
+from api.schemas.workout_exercise_record import WorkoutExerciseRecordCreate, WorkoutExerciseRecordUpdate
+from api.schemas.set_record import SetRecordCreate, SetRecordUpdate
+from api.auth.auth import get_current_user
 
 router = APIRouter(prefix="/api")
 

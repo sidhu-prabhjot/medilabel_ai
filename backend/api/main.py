@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.api.routers import auth, medical, workouts, routines, exercises, body_metrics, plans
+from api.routers import auth, medical, workouts, routines, exercises, body_metrics, plans
 
 app = FastAPI()
 # TEMP_IMAGE_DIR = "temp_url_images"

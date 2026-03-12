@@ -3,11 +3,11 @@ from uuid import UUID
 
 import httpx
 from fastapi import APIRouter, Depends, HTTPException
-from backend.api.db.supabase import supabase
-from backend.api.auth.auth import get_current_user
-from backend.api.schemas.symptom_logs import SymptomLogCreate, SymptomLogUpdate
-from backend.api.schemas.medication_record import MedicationRecordCreate, MedicationRecordUpdate
-from backend.api.schemas.stock_record import StockRecordCreate
+from api.db.supabase import supabase
+from api.auth.auth import get_current_user
+from api.schemas.symptom_logs import SymptomLogCreate, SymptomLogUpdate
+from api.schemas.medication_record import MedicationRecordCreate, MedicationRecordUpdate
+from api.schemas.stock_record import StockRecordCreate
 
 router = APIRouter(prefix="/api")
 
