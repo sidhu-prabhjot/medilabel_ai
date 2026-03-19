@@ -7,6 +7,13 @@ from api.auth.jwt import create_access_token, decode_access_token
 from api.db.supabase import supabase
 from api.schemas.user import UserCreate, UserLogin, Token
 
+#rate limiting
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+from fastapi import Request
+
+limiter = Limiter(key_func=get_remote_address)
+
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
 
 bearer_scheme = HTTPBearer()
@@ -17,7 +24,8 @@ bearer_scheme = HTTPBearer()
 # ------------------------------------------------------------------
 
 @router.post("/signup", response_model=Token, summary="Create a new user")
-def signup(user: UserCreate):
+@limiter.limit("3/minute")
+def signup(request:Request, user: UserCreate):
     existing = supabase.table("users").select("id").eq("email", user.email).execute()
     if existing.data:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -42,7 +50,8 @@ def signup(user: UserCreate):
 # ------------------------------------------------------------------
 
 @router.post("/login", response_model=Token, summary="Login and get JWT")
-def login(user: UserLogin):
+@limiter.limit("10/hour")
+def login(request: Request, user: UserLogin):
     response = supabase.table("users").select("*").eq("email", user.email).execute()
 
     if not response.data:
