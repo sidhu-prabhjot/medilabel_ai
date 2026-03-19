@@ -118,7 +118,10 @@ async def delete_symptom_log(
 # ------------------------------------------------------------------
 
 @router.get("/medications/search")
-async def search_medications(medication_term: str):
+async def search_medications(
+    medication_term: str,
+    _: UUID = Depends(get_current_user),
+):
     async with httpx.AsyncClient() as client:
         id_search_url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={medication_term}&search=9&allsrc=0"
         id_search_response = await client.get(id_search_url, timeout=5)
@@ -141,7 +144,10 @@ async def search_medications(medication_term: str):
 
 
 @router.get("/medications/{medication_id}")
-async def get_medication(medication_id: int):
+async def get_medication(
+    medication_id: int,
+    _: UUID = Depends(get_current_user),
+):
     response = (
         supabase.table("medications")
         .select("*")
@@ -156,7 +162,10 @@ async def get_medication(medication_id: int):
 
 
 @router.post("/medications")
-async def add_medication(medication_record: MedicationRecordCreate):
+async def add_medication(
+    medication_record: MedicationRecordCreate,
+    _: UUID = Depends(get_current_user),
+):
     if medication_record.tty.lower() not in ("bn", "sbd", "scd"):
         raise HTTPException(status_code=400, detail=f"Unsupported term type (TTY): {medication_record.tty}")
 
@@ -177,6 +186,7 @@ async def add_medication(medication_record: MedicationRecordCreate):
 async def update_medication(
     medication_id: int,
     updated_record: MedicationRecordUpdate,
+    _: UUID = Depends(get_current_user),
 ):
     update_data = updated_record.dict(exclude_unset=True)
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
@@ -191,7 +201,10 @@ async def update_medication(
 
 
 @router.delete("/medications/{medication_id}")
-async def delete_medication(medication_id: int):
+async def delete_medication(
+    medication_id: int,
+    _: UUID = Depends(get_current_user),
+):
     supabase.table("medications").delete().eq("medication_id", medication_id).execute()
     return {"success": True}
 

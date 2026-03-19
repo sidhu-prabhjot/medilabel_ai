@@ -1,5 +1,8 @@
-from fastapi import APIRouter, HTTPException
+from uuid import UUID
+
+from fastapi import APIRouter, Depends, HTTPException
 from api.db.supabase import supabase
+from api.auth.auth import get_current_user
 from api.schemas.exercise_record import ExerciseRecordCreate
 
 router = APIRouter(prefix="/api")
@@ -10,7 +13,10 @@ router = APIRouter(prefix="/api")
 # ------------------------------------------------------------------
 
 @router.post("/exercises")
-async def create_exercise(exercise_record: ExerciseRecordCreate):
+async def create_exercise(
+    exercise_record: ExerciseRecordCreate,
+    _: UUID = Depends(get_current_user),
+):
     response = (
         supabase.table("exercises")
         .insert({
@@ -24,13 +30,16 @@ async def create_exercise(exercise_record: ExerciseRecordCreate):
 
 
 @router.get("/exercises")
-async def get_all_exercises():
+async def get_all_exercises(_: UUID = Depends(get_current_user)):
     response = supabase.table("exercises").select("*").execute()
     return {"success": True, "exercises": response.data}
 
 
 @router.get("/exercises/{exercise_id}")
-async def get_exercise_by_id(exercise_id: int):
+async def get_exercise_by_id(
+    exercise_id: int,
+    _: UUID = Depends(get_current_user),
+):
     response = (
         supabase.table("exercises")
         .select("*")

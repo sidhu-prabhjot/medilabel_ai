@@ -1,0 +1,12 @@
+# Environment files - keep sensitive keys away from Claude Code
+.env
+.env.local
+.env.development
+.env.development.local
+.env.test
+.env.test.local
+.env.staging
+.env.production
+.env.production.local
+.env.*.local
+*.env
