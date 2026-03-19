@@ -12,8 +12,15 @@ def get_current_user(
 ) -> UUID:
     try:
         payload = decode_access_token(credentials.credentials)
-        user_id = UUID(payload.get("sub"))
     except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid or expired token",
+        )
+
+    try:
+        user_id = UUID(payload.get("sub"))
+    except (ValueError, TypeError):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",

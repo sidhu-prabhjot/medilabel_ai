@@ -1,9 +1,7 @@
-from uuid import UUID
-from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import HTTPBearer
+from fastapi import APIRouter, HTTPException
 
 from api.auth.hash import hash_password, verify_password
-from api.auth.jwt import create_access_token, decode_access_token
+from api.auth.jwt import create_access_token
 from api.db.supabase import supabase
 from api.schemas.user import UserCreate, UserLogin, Token
 
@@ -15,8 +13,6 @@ from fastapi import Request
 limiter = Limiter(key_func=get_remote_address)
 
 router = APIRouter(prefix="/api/auth", tags=["Auth"])
-
-bearer_scheme = HTTPBearer()
 
 
 # ------------------------------------------------------------------
@@ -64,28 +60,3 @@ def login(request: Request, user: UserLogin):
 
     token = create_access_token({"sub": str(db_user["id"])})
     return {"access_token": token, "token_type": "bearer"}
-
-
-# ------------------------------------------------------------------
-# Get current user dependency
-# ------------------------------------------------------------------
-
-def get_current_user(token: str = Depends(bearer_scheme)) -> UUID:
-    try:
-        payload = decode_access_token(token.credentials)
-        user_id = UUID(payload.get("sub"))
-    except Exception:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
-        )
-
-    response = supabase.table("users").select("id").eq("id", str(user_id)).execute()
-
-    if not response.data:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
-    return user_id

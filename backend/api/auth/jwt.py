@@ -1,5 +1,5 @@
 # backend/utils/jwt.py
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import jwt
 import os
 from dotenv import load_dotenv
@@ -11,12 +11,14 @@ if not SECRET_KEY:
     raise RuntimeError("JWT_SECRET_KEY is not set in environment variables")
 
 # Use a secret key! In production, load from env vars
-ALGORITHM = os.getenv("JWT_ALGORITHM")
+ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+if ALGORITHM not in ("HS256", "HS384", "HS512"):
+    raise RuntimeError(f"Unsupported JWT_ALGORITHM: '{ALGORITHM}'. Must be HS256, HS384, or HS512")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
+    expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
     token = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return token
