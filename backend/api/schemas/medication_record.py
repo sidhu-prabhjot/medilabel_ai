@@ -1,4 +1,3 @@
-from datetime import datetime, timezone
 from pydantic import BaseModel, Field
 from typing import Optional
 
@@ -12,4 +11,3 @@ class MedicationRecordUpdate(BaseModel):
     name: Optional[str] = Field(None, description="Canonical RxNorm display name")
     generic_rxcui: Optional[str] = Field(None)
     is_brand: Optional[bool] = Field(None)
-    datetime.now(timezone.utc).isoformat()

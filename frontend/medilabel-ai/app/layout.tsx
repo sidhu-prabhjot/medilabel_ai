@@ -1,4 +1,5 @@
 import "./globals.css";
+import { ThemeProvider } from "./src/context/theme-context";
 
 export const metadata = {
   title: "MediLabel AI",
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-100">{children}</body>
+      <body className="min-h-screen">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   );
 }

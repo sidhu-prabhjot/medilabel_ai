@@ -89,7 +89,7 @@ async def create_workout_plan(
         })
         .execute()
     )
-    return {"success": True, "plan": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-plans")
@@ -100,7 +100,7 @@ async def get_all_workout_plans(user_id: UUID = Depends(get_current_user)):
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "plans": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-plans/{plan_id}")
@@ -116,7 +116,7 @@ async def get_workout_plan(
         .eq("id", plan_id)
         .execute()
     )
-    return {"success": True, "plan": response.data[0]}
+    return {"data": response.data[0]}
 
 
 @router.put("/workout-plans/{plan_id}")
@@ -127,7 +127,7 @@ async def update_workout_plan(
 ):
     verify_plan_ownership(plan_id, user_id)
 
-    update_data = updated_plan.dict(exclude_unset=True)
+    update_data = updated_plan.model_dump(exclude_unset=True)
 
     response = (
         supabase.table("workout_plans")
@@ -136,7 +136,7 @@ async def update_workout_plan(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "updated_plan": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/workout-plans/{plan_id}")
@@ -172,7 +172,7 @@ async def add_day_to_plan(
         })
         .execute()
     )
-    return {"success": True, "plan_day": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-plans/{plan_id}/days")
@@ -189,7 +189,7 @@ async def get_all_days_in_plan(
         .order("weekday", desc=False)
         .execute()
     )
-    return {"success": True, "plan_days": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-plans/{plan_id}/days/{plan_day_id}")
@@ -211,7 +211,7 @@ async def get_plan_day(
     if not response.data:
         raise HTTPException(status_code=404, detail="Plan day not found")
 
-    return {"success": True, "plan_day": response.data[0]}
+    return {"data": response.data[0]}
 
 
 @router.put("/workout-plans/{plan_id}/days/{plan_day_id}")
@@ -224,7 +224,7 @@ async def update_plan_day(
     verify_plan_ownership(plan_id, user_id)
     verify_plan_day_ownership(plan_day_id, user_id)
 
-    update_data = updated_day.dict(exclude_unset=True)
+    update_data = updated_day.model_dump(exclude_unset=True)
 
     if "routine_id" in update_data:
         verify_routine_belongs_to_user(update_data["routine_id"], user_id)
@@ -236,7 +236,7 @@ async def update_plan_day(
         .eq("plan_id", plan_id)
         .execute()
     )
-    return {"success": True, "updated_plan_day": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/workout-plans/{plan_id}/days/{plan_day_id}")

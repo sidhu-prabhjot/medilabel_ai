@@ -3,8 +3,8 @@ from pydantic import BaseModel, Field
 from typing import Optional
 
 class StockRecordCreate(BaseModel):
-    quantity: Optional[int] = Field(None)
-    unit: Optional[str] = Field(None)
+    quantity: Optional[int] = Field(None, ge=0)
+    unit: Optional[str] = Field(None, max_length=50)
     expiration_date: Optional[date] = Field(
         None,
         description="Medication expiration date (YYYY-MM-DD)"
@@ -13,4 +13,4 @@ class StockRecordCreate(BaseModel):
         None,
         description="Date medication was opened (YYYY-MM-DD)"
     )
-    notes: Optional[str] = Field(None)
+    notes: Optional[str] = Field(None, max_length=500)

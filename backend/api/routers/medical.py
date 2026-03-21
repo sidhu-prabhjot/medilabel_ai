@@ -60,7 +60,7 @@ async def get_symptom_logs(user_id: UUID = Depends(get_current_user)):
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "symptom_logs": response.data}
+    return {"data": response.data}
 
 
 @router.post("/symptoms")
@@ -79,7 +79,7 @@ async def add_symptom_log(
         })
         .execute()
     )
-    return {"success": True, "symptom_log": response.data}
+    return {"data": response.data}
 
 
 @router.put("/symptoms/{symptom_id}")
@@ -90,7 +90,7 @@ async def update_symptom_log(
 ):
     verify_symptom_ownership(symptom_id, user_id)
 
-    update_data = symptom_log_update.dict(exclude_unset=True)
+    update_data = symptom_log_update.model_dump(exclude_unset=True)
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     response = (
@@ -100,7 +100,7 @@ async def update_symptom_log(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "updated_symptom_log": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/symptoms/{symptom_id}")
@@ -122,25 +122,33 @@ async def search_medications(
     medication_term: str,
     _: UUID = Depends(get_current_user),
 ):
-    async with httpx.AsyncClient() as client:
-        id_search_url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={medication_term}&search=9&allsrc=0"
-        id_search_response = await client.get(id_search_url, timeout=5)
-        id_search_response.raise_for_status()
+    try:
+        async with httpx.AsyncClient() as client:
+            id_search_url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={medication_term}&search=9&allsrc=0"
+            id_search_response = await client.get(id_search_url, timeout=5)
+            id_search_response.raise_for_status()
 
-        id_array = id_search_response.json()["idGroup"]["rxnormId"]
+            id_array = id_search_response.json().get("idGroup", {}).get("rxnormId")
+            if not id_array:
+                return {"data": []}
 
-        db_response = supabase.table("medications").select("*").in_("rxcui", id_array).execute()
-        if db_response.data:
-            return {"success": True, "medications": db_response.data}
+            db_response = supabase.table("medications").select("*").in_("rxcui", id_array).execute()
+            if db_response.data:
+                return {"data": db_response.data}
 
-        data = []
-        for rxcui_id in id_array:
-            properties_url = f"https://rxnav.nlm.nih.gov/REST/rxcui/{rxcui_id}/properties.json"
-            properties_response = await client.get(properties_url, timeout=5)
-            properties_response.raise_for_status()
-            data.append(properties_response.json())
+            data = []
+            for rxcui_id in id_array:
+                properties_url = f"https://rxnav.nlm.nih.gov/REST/rxcui/{rxcui_id}/properties.json"
+                properties_response = await client.get(properties_url, timeout=5)
+                properties_response.raise_for_status()
+                data.append(properties_response.json())
 
-    return {"success": True, "medications": data}
+    except httpx.TimeoutException:
+        raise HTTPException(status_code=504, detail="Medication search timed out")
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=502, detail=f"Upstream API error: {e.response.status_code}")
+
+    return {"data": data}
 
 
 @router.get("/medications/{medication_id}")
@@ -158,7 +166,7 @@ async def get_medication(
     if not response.data:
         raise HTTPException(status_code=404, detail="Medication not found")
 
-    return {"success": True, "medication": response.data[0]}
+    return {"data": response.data[0]}
 
 
 @router.post("/medications")
@@ -179,7 +187,7 @@ async def add_medication(
         })
         .execute()
     )
-    return {"success": True, "medication": response.data}
+    return {"data": response.data}
 
 
 @router.put("/medications/{medication_id}")
@@ -188,7 +196,7 @@ async def update_medication(
     updated_record: MedicationRecordUpdate,
     _: UUID = Depends(get_current_user),
 ):
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     response = (
@@ -197,7 +205,7 @@ async def update_medication(
         .eq("medication_id", medication_id)
         .execute()
     )
-    return {"success": True, "updated_medication": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/medications/{medication_id}")
@@ -232,7 +240,7 @@ async def add_medication_to_stock(
         })
         .execute()
     )
-    return {"success": True, "stock": response.data}
+    return {"data": response.data}
 
 
 @router.get("/user/medications")
@@ -243,7 +251,7 @@ async def get_all_user_medications(user_id: UUID = Depends(get_current_user)):
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "medications": response.data}
+    return {"data": response.data}
 
 
 @router.get("/medications/stock/{stock_id}")
@@ -260,4 +268,4 @@ async def get_user_medication_stock(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "stock": response.data[0]}
+    return {"data": response.data[0]}

@@ -79,7 +79,7 @@ def verify_routine_set_ownership(set_id: int, user_id: UUID):
 
 def convert_decimals_to_float(data: dict) -> dict:
     for key, value in data.items():
-        if type(value) is Decimal:
+        if isinstance(value, Decimal):
             data[key] = float(value)
     return data
 
@@ -102,7 +102,7 @@ async def create_workout_routine(
         })
         .execute()
     )
-    return {"success": True, "routine": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-routines")
@@ -113,7 +113,7 @@ async def get_all_workout_routines(user_id: UUID = Depends(get_current_user)):
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "routines": response.data}
+    return {"data": response.data}
 
 
 @router.put("/workout-routines/{routine_id}")
@@ -124,7 +124,7 @@ async def update_workout_routine(
 ):
     verify_routine_ownership(routine_id, user_id)
 
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
 
     response = (
         supabase.table("workout_routines")
@@ -133,7 +133,7 @@ async def update_workout_routine(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "updated_routine": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/workout-routines/{routine_id}")
@@ -168,7 +168,7 @@ async def add_exercise_to_routine(
         })
         .execute()
     )
-    return {"success": True, "exercise": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-routines/{routine_id}/exercises")
@@ -185,7 +185,7 @@ async def get_exercises_in_routine(
         .order("order_index", desc=False)
         .execute()
     )
-    return {"success": True, "exercises": response.data}
+    return {"data": response.data}
 
 
 @router.put("/routine-exercises/{routine_exercise_id}")
@@ -196,7 +196,7 @@ async def update_routine_exercise(
 ):
     verify_routine_exercise_ownership(routine_exercise_id, user_id)
 
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
 
     response = (
         supabase.table("routine_exercises")
@@ -204,7 +204,7 @@ async def update_routine_exercise(
         .eq("id", routine_exercise_id)
         .execute()
     )
-    return {"success": True, "updated_exercise": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/routine-exercises/{routine_exercise_id}")
@@ -240,7 +240,7 @@ async def add_set_to_routine_exercise(
         })
         .execute()
     )
-    return {"success": True, "set": response.data}
+    return {"data": response.data}
 
 
 @router.get("/routine-exercises/{routine_exercise_id}/sets")
@@ -256,7 +256,7 @@ async def get_sets_in_routine_exercise(
         .eq("routine_exercise_id", routine_exercise_id)
         .execute()
     )
-    return {"success": True, "sets": response.data}
+    return {"data": response.data}
 
 
 @router.get("/routine-sets/{set_id}")
@@ -276,7 +276,7 @@ async def get_routine_set_by_id(
     if not response.data:
         raise HTTPException(status_code=404, detail="Routine set not found")
 
-    return {"success": True, "set": response.data[0]}
+    return {"data": response.data[0]}
 
 
 @router.put("/routine-sets/{set_id}")
@@ -287,7 +287,7 @@ async def update_routine_set(
 ):
     verify_routine_set_ownership(set_id, user_id)
 
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
     update_data = convert_decimals_to_float(update_data)
 
     response = (
@@ -296,7 +296,7 @@ async def update_routine_set(
         .eq("id", set_id)
         .execute()
     )
-    return {"success": True, "updated_set": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/routine-sets/{set_id}")

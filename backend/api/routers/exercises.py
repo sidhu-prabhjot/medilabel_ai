@@ -26,13 +26,13 @@ async def create_exercise(
         })
         .execute()
     )
-    return {"success": True, "exercise": response.data}
+    return {"data": response.data}
 
 
 @router.get("/exercises")
 async def get_all_exercises(_: UUID = Depends(get_current_user)):
     response = supabase.table("exercises").select("*").execute()
-    return {"success": True, "exercises": response.data}
+    return {"data": response.data}
 
 
 @router.get("/exercises/{exercise_id}")
@@ -50,4 +50,4 @@ async def get_exercise_by_id(
     if not response.data:
         raise HTTPException(status_code=404, detail="Exercise not found")
 
-    return {"success": True, "exercise": response.data[0]}
+    return {"data": response.data[0]}

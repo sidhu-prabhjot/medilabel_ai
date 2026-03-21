@@ -4,6 +4,7 @@ from api.auth.hash import hash_password, verify_password
 from api.auth.jwt import create_access_token
 from api.db.supabase import supabase
 from api.schemas.user import UserCreate, UserLogin, Token
+from postgrest.exceptions import APIError as PostgrestAPIError
 
 #rate limiting
 from slowapi import Limiter
@@ -22,16 +23,17 @@ router = APIRouter(prefix="/api/auth", tags=["Auth"])
 @router.post("/signup", response_model=Token, summary="Create a new user")
 @limiter.limit("3/minute")
 def signup(request:Request, user: UserCreate):
-    existing = supabase.table("users").select("id").eq("email", user.email).execute()
-    if existing.data:
-        raise HTTPException(status_code=400, detail="Email already registered")
-
     hashed = hash_password(user.password)
 
-    response = supabase.table("users").insert({
-        "email": user.email,
-        "password": hashed,
-    }).execute()
+    try:
+        response = supabase.table("users").insert({
+            "email": user.email,
+            "password": hashed,
+        }).execute()
+    except PostgrestAPIError as e:
+        if "23505" in str(e): #unique violation
+            raise HTTPException(status_code=400, detail="Email already registered")
+        raise
 
     if not response.data:
         raise HTTPException(status_code=500, detail="Failed to create user")

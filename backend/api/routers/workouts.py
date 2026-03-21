@@ -18,7 +18,7 @@ router = APIRouter(prefix="/api")
 
 def convert_decimals_to_float(data: dict) -> dict:
     for key, value in data.items():
-        if type(value) is Decimal:
+        if isinstance(value, Decimal):
             data[key] = float(value)
     return data
 
@@ -35,9 +35,7 @@ def verify_workout_ownership(workout_id: int, user_id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Workout not found")
 
-    workout_owner_id = result.data[0]["user_id"]
-
-    if str(user_id) != workout_owner_id:
+    if str(user_id) != result.data[0]["user_id"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 
@@ -59,9 +57,7 @@ def verify_workout_exercise_ownership(workout_exercise_id: int, user_id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Workout exercise not found")
 
-    workout_owner_id = result.data[0]["workouts"][0]["user_id"]
-
-    if str(user_id) != workout_owner_id:
+    if str(user_id) != result.data[0]["workouts"][0]["user_id"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 
@@ -85,9 +81,7 @@ def verify_set_ownership(set_id: int, user_id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    workout_owner_id = result.data[0]["workout_exercises"][0]["workouts"][0]["user_id"]
-
-    if str(user_id) != workout_owner_id:
+    if str(user_id) != result.data[0]["workout_exercises"][0]["workouts"][0]["user_id"]:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 
@@ -111,7 +105,7 @@ async def add_new_workout(
         })
         .execute()
     )
-    return {"success": True, "workout": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workouts")
@@ -122,7 +116,7 @@ async def get_all_user_workouts(user_id: UUID = Depends(get_current_user)):
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "workouts": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workouts/{workout_id}")
@@ -138,7 +132,7 @@ async def get_workout_by_id(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "workout": response.data}
+    return {"data": response.data}
 
 
 @router.put("/workouts/{workout_id}")
@@ -149,7 +143,7 @@ async def update_workout(
 ):
     verify_workout_ownership(workout_id, user_id)
 
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
     update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
 
     response = (
@@ -159,7 +153,7 @@ async def update_workout(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"success": True, "updated_workout": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/workouts/{workout_id}")
@@ -192,7 +186,7 @@ async def add_exercise_to_workout(
         })
         .execute()
     )
-    return {"success": True, "exercise": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workouts/{workout_id}/exercises")
@@ -207,7 +201,7 @@ async def get_exercises_in_workout(
         .eq("workout_id", workout_id)
         .execute()
     )
-    return {"success": True, "exercises": response.data}
+    return {"data": response.data}
 
 
 @router.put("/workout-exercises/{workout_exercise_id}")
@@ -218,14 +212,14 @@ async def update_workout_exercise(
 ):
     verify_workout_exercise_ownership(workout_exercise_id, user_id)
 
-    update_payload = updated_data.dict(exclude_unset=True)
+    update_payload = updated_data.model_dump(exclude_unset=True)
     response = (
         supabase.table("workout_exercises")
         .update(update_payload)
         .eq("id", workout_exercise_id)
         .execute()
     )
-    return {"success": True, "updated_exercise": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/workout-exercises/{workout_exercise_id}")
@@ -260,7 +254,7 @@ async def add_set_to_workout_exercise(
         })
         .execute()
     )
-    return {"success": True, "set": response.data}
+    return {"data": response.data}
 
 
 @router.get("/workout-exercises/{workout_exercise_id}/sets")
@@ -275,7 +269,7 @@ async def get_sets_for_workout_exercise(
         .eq("workout_exercise_id", workout_exercise_id)
         .execute()
     )
-    return {"success": True, "sets": response.data}
+    return {"data": response.data}
 
 
 @router.put("/sets/{set_id}")
@@ -286,11 +280,11 @@ async def update_set(
 ):
     verify_set_ownership(set_id, user_id)
 
-    update_data = updated_record.dict(exclude_unset=True)
+    update_data = updated_record.model_dump(exclude_unset=True)
     update_data = convert_decimals_to_float(update_data)
 
     response = supabase.table("sets").update(update_data).eq("id", set_id).execute()
-    return {"success": True, "updated_set": response.data}
+    return {"data": response.data}
 
 
 @router.delete("/sets/{set_id}")
