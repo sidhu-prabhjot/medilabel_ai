@@ -25,5 +25,14 @@ temp_url_images/
 
 ml_models/model_training/qa_chat_trained/
 
+# Node modules
+node_modules/
+
+# Next.js build output
+.next/
+
 # VSCode settings (optional)
 .vscode/
+
+# Redundant pip freeze dump
+backend/requirements_new.txt
