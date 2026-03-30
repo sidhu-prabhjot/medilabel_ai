@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from uuid import UUID
+import jwt
 
 from api.auth.jwt import decode_access_token
 from api.db.supabase import supabase
@@ -12,10 +13,15 @@ def get_current_user(
 ) -> UUID:
     try:
         payload = decode_access_token(credentials.credentials)
-    except Exception:
+    except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired token",
+            detail="Token has expired",
+        )
+    except jwt.InvalidTokenError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token",
         )
 
     try:

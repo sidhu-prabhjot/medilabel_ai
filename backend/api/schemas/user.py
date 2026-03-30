@@ -10,12 +10,23 @@ class UserCreate(BaseModel):
     @field_validator("password")
     @classmethod
     def validate_password(cls, v: str) -> str:
-        if len(v) < 8:
-            raise ValueError("Password must be at least 8 characters")
+        special_characters = "!@#$%^&*()-_=+[]{}|;:',.<>?/`~"
+        errors = []
+
+        if len(v) < 12:
+            errors.append("at least 12 characters")
+        if not any(c.islower() for c in v):
+            errors.append("at least one lowercase letter")
         if not any(c.isupper() for c in v):
-            raise ValueError("Password must contain at least one uppercase letter")
+            errors.append("at least one uppercase letter")
         if not any(c.isdigit() for c in v):
-            raise ValueError("Password must contain at least one number")
+            errors.append("at least one number")
+        if not any(c in special_characters for c in v):
+            errors.append("at least one special character (!@#$%^&* etc.)")
+
+        if errors:
+            raise ValueError("Password must contain " + ", ".join(errors))
+
         return v
 
 class UserLogin(BaseModel):

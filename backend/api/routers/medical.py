@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from api.db.supabase import supabase
 from api.auth.auth import get_current_user
 from api.schemas.symptom_logs import SymptomLogCreate, SymptomLogUpdate, SymptomLogResponse
-from api.schemas.medication_record import MedicationRecordCreate, MedicationRecordUpdate, MedicationResponse
+from api.schemas.medication_record import MedicationRecordCreate, MedicationResponse
 from api.schemas.stock_record import StockRecordCreate, StockRecordResponse
 from api.schemas.common import DataResponse
 from api.limiter import limiter
@@ -208,41 +208,6 @@ async def add_medication(
     return {"data": response.data[0]}
 
 
-@router.put("/medications/{medication_id}", response_model=DataResponse[MedicationResponse])
-@limiter.limit("15/minute")
-async def update_medication(
-    request: Request,
-    medication_id: int,
-    updated_record: MedicationRecordUpdate,
-    _: UUID = Depends(get_current_user),
-):
-    update_data = updated_record.model_dump(exclude_unset=True)
-    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
-
-    response = (
-        supabase.table("medications")
-        .update(update_data)
-        .eq("medication_id", medication_id)
-        .execute()
-    )
-    if not response.data:
-        raise HTTPException(status_code=404, detail="Medication not found")
-    return {"data": response.data[0]}
-
-
-@router.delete("/medications/{medication_id}", status_code=204)
-@limiter.limit("10/minute")
-async def delete_medication(
-    request: Request,
-    medication_id: int,
-    _: UUID = Depends(get_current_user),
-):
-    existing = supabase.table("medications").select("medication_id").eq("medication_id", medication_id).execute()
-    if not existing.data:
-        raise HTTPException(status_code=404, detail="Medication not found")
-    supabase.table("medications").delete().eq("medication_id", medication_id).execute()
-    return Response(status_code=204)
-
 
 # ------------------------------------------------------------------
 # Medication stock routes
@@ -256,6 +221,11 @@ async def add_medication_to_stock(
     stock_record: StockRecordCreate,
     user_id: UUID = Depends(get_current_user),
 ):
+    #check existence of medication first
+    medication = supabase.table("medications").select("medication_id").eq("medication_id", medication_id).execute()
+    if not medication.data:
+        raise HTTPException(status_code=404, detail="Medication not found")
+
     response = (
         supabase.table("user_medication_stock")
         .insert({
