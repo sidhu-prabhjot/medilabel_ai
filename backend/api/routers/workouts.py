@@ -2,14 +2,16 @@ from decimal import Decimal
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from api.db.supabase import supabase
-from api.schemas.workout_record import WorkoutRecordCreate, WorkoutRecordUpdate
-from api.schemas.workout_exercise_record import WorkoutExerciseRecordCreate, WorkoutExerciseRecordUpdate
-from api.schemas.set_record import SetRecordCreate, SetRecordUpdate
+from api.schemas.workout_record import WorkoutRecordCreate, WorkoutRecordUpdate, WorkoutResponse
+from api.schemas.workout_exercise_record import WorkoutExerciseRecordCreate, WorkoutExerciseRecordUpdate, WorkoutExerciseResponse
+from api.schemas.set_record import SetRecordCreate, SetRecordUpdate, SetResponse
+from api.schemas.common import DataResponse
 from api.auth.auth import get_current_user
+from api.limiter import limiter
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", tags=["Workouts"])
 
 
 # ------------------------------------------------------------------
@@ -89,8 +91,10 @@ def verify_set_ownership(set_id: int, user_id: UUID):
 # Workout routes
 # ------------------------------------------------------------------
 
-@router.post("/workouts")
+@router.post("/workouts", response_model=DataResponse[WorkoutResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_new_workout(
+    request: Request,
     workout_record: WorkoutRecordCreate,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -105,11 +109,12 @@ async def add_new_workout(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/workouts")
-async def get_all_user_workouts(user_id: UUID = Depends(get_current_user)):
+@router.get("/workouts", response_model=DataResponse[list[WorkoutResponse]])
+@limiter.limit("30/minute")
+async def get_all_user_workouts(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("workouts")
         .select("*")
@@ -119,8 +124,10 @@ async def get_all_user_workouts(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data}
 
 
-@router.get("/workouts/{workout_id}")
+@router.get("/workouts/{workout_id}", response_model=DataResponse[WorkoutResponse])
+@limiter.limit("30/minute")
 async def get_workout_by_id(
+    request: Request,
     workout_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -132,11 +139,13 @@ async def get_workout_by_id(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.put("/workouts/{workout_id}")
+@router.put("/workouts/{workout_id}", response_model=DataResponse[WorkoutResponse])
+@limiter.limit("15/minute")
 async def update_workout(
+    request: Request,
     workout_id: int,
     updated_record: WorkoutRecordUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -153,25 +162,29 @@ async def update_workout(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/workouts/{workout_id}")
+@router.delete("/workouts/{workout_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_workout(
+    request: Request,
     workout_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_workout_ownership(workout_id, user_id)
     supabase.table("workouts").delete().eq("id", workout_id).eq("user_id", str(user_id)).execute()
-    return {"success": True}
+    return Response(status_code=204)
 
 
 # ------------------------------------------------------------------
 # Workout exercise routes
 # ------------------------------------------------------------------
 
-@router.post("/workouts/{workout_id}/exercises")
+@router.post("/workouts/{workout_id}/exercises", response_model=DataResponse[WorkoutExerciseResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_exercise_to_workout(
+    request: Request,
     workout_id: int,
     workout_exercise_record: WorkoutExerciseRecordCreate,
     user_id: UUID = Depends(get_current_user),
@@ -186,11 +199,13 @@ async def add_exercise_to_workout(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/workouts/{workout_id}/exercises")
+@router.get("/workouts/{workout_id}/exercises", response_model=DataResponse[list[WorkoutExerciseResponse]])
+@limiter.limit("30/minute")
 async def get_exercises_in_workout(
+    request: Request,
     workout_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -204,8 +219,10 @@ async def get_exercises_in_workout(
     return {"data": response.data}
 
 
-@router.put("/workout-exercises/{workout_exercise_id}")
+@router.put("/workout-exercises/{workout_exercise_id}", response_model=DataResponse[WorkoutExerciseResponse])
+@limiter.limit("15/minute")
 async def update_workout_exercise(
+    request: Request,
     workout_exercise_id: int,
     updated_data: WorkoutExerciseRecordUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -219,25 +236,29 @@ async def update_workout_exercise(
         .eq("id", workout_exercise_id)
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/workout-exercises/{workout_exercise_id}")
+@router.delete("/workout-exercises/{workout_exercise_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_exercise_from_workout(
+    request: Request,
     workout_exercise_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_workout_exercise_ownership(workout_exercise_id, user_id)
     supabase.table("workout_exercises").delete().eq("id", workout_exercise_id).execute()
-    return {"success": True}
+    return Response(status_code=204)
 
 
 # ------------------------------------------------------------------
 # Set routes
 # ------------------------------------------------------------------
 
-@router.post("/workout-exercises/{workout_exercise_id}/sets")
+@router.post("/workout-exercises/{workout_exercise_id}/sets", response_model=DataResponse[SetResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_set_to_workout_exercise(
+    request: Request,
     workout_exercise_id: int,
     set_record: SetRecordCreate,
     user_id: UUID = Depends(get_current_user),
@@ -254,11 +275,13 @@ async def add_set_to_workout_exercise(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/workout-exercises/{workout_exercise_id}/sets")
+@router.get("/workout-exercises/{workout_exercise_id}/sets", response_model=DataResponse[list[SetResponse]])
+@limiter.limit("30/minute")
 async def get_sets_for_workout_exercise(
+    request: Request,
     workout_exercise_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -272,8 +295,10 @@ async def get_sets_for_workout_exercise(
     return {"data": response.data}
 
 
-@router.put("/sets/{set_id}")
+@router.put("/sets/{set_id}", response_model=DataResponse[SetResponse])
+@limiter.limit("15/minute")
 async def update_set(
+    request: Request,
     set_id: int,
     updated_record: SetRecordUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -284,14 +309,16 @@ async def update_set(
     update_data = convert_decimals_to_float(update_data)
 
     response = supabase.table("sets").update(update_data).eq("id", set_id).execute()
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/sets/{set_id}")
+@router.delete("/sets/{set_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_set(
+    request: Request,
     set_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_set_ownership(set_id, user_id)
     supabase.table("sets").delete().eq("id", set_id).execute()
-    return {"success": True}
+    return Response(status_code=204)

@@ -36,3 +36,5 @@ node_modules/
 
 # Redundant pip freeze dump
 backend/requirements_new.txt
+
+CLAUDE.md

@@ -4,7 +4,17 @@ from pydantic import BaseModel, Field
 from datetime import datetime
 
 
+class ExerciseResponse(BaseModel):
+    id: int
+    exercise_name: str
+    muscle_group: str
+    equipment: Optional[str]
+    created_at: datetime
+
+
 class ExerciseRecordCreate(BaseModel):
+    model_config = {"str_strip_whitespace": True}
+
     exercise_name: Annotated[
         str,
         Field(min_length=1, max_length=100)
@@ -24,6 +34,8 @@ class ExerciseRecordCreate(BaseModel):
 
 
 class ExerciseRecordUpdate(BaseModel):
+    model_config = {"str_strip_whitespace": True}
+
     exercise_name: Optional[
         Annotated[
             str,

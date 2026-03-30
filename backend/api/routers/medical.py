@@ -2,14 +2,16 @@ from datetime import datetime, timezone
 from uuid import UUID
 
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from api.db.supabase import supabase
 from api.auth.auth import get_current_user
-from api.schemas.symptom_logs import SymptomLogCreate, SymptomLogUpdate
-from api.schemas.medication_record import MedicationRecordCreate, MedicationRecordUpdate
-from api.schemas.stock_record import StockRecordCreate
+from api.schemas.symptom_logs import SymptomLogCreate, SymptomLogUpdate, SymptomLogResponse
+from api.schemas.medication_record import MedicationRecordCreate, MedicationRecordUpdate, MedicationResponse
+from api.schemas.stock_record import StockRecordCreate, StockRecordResponse
+from api.schemas.common import DataResponse
+from api.limiter import limiter
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", tags=["Medical"])
 
 
 # ------------------------------------------------------------------
@@ -52,8 +54,9 @@ def verify_stock_ownership(stock_id: int, user_id: UUID):
 # Symptom routes
 # ------------------------------------------------------------------
 
-@router.get("/symptoms")
-async def get_symptom_logs(user_id: UUID = Depends(get_current_user)):
+@router.get("/symptoms", response_model=DataResponse[list[SymptomLogResponse]])
+@limiter.limit("30/minute")
+async def get_symptom_logs(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("symptom_logs")
         .select("*")
@@ -63,8 +66,10 @@ async def get_symptom_logs(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data}
 
 
-@router.post("/symptoms")
+@router.post("/symptoms", response_model=DataResponse[SymptomLogResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_symptom_log(
+    request: Request,
     symptom_log: SymptomLogCreate,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -79,11 +84,13 @@ async def add_symptom_log(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.put("/symptoms/{symptom_id}")
+@router.put("/symptoms/{symptom_id}", response_model=DataResponse[SymptomLogResponse])
+@limiter.limit("15/minute")
 async def update_symptom_log(
+    request: Request,
     symptom_id: str,
     symptom_log_update: SymptomLogUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -100,17 +107,19 @@ async def update_symptom_log(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/symptoms/{symptom_id}")
+@router.delete("/symptoms/{symptom_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_symptom_log(
+    request: Request,
     symptom_id: str,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_symptom_ownership(symptom_id, user_id)
     supabase.table("symptom_logs").delete().eq("symptom_id", symptom_id).eq("user_id", str(user_id)).execute()
-    return {"success": True}
+    return Response(status_code=204)
 
 
 # ------------------------------------------------------------------
@@ -118,14 +127,19 @@ async def delete_symptom_log(
 # ------------------------------------------------------------------
 
 @router.get("/medications/search")
+@limiter.limit("5/minute")
 async def search_medications(
-    medication_term: str,
+    request: Request,
+    medication_term: str = Query(..., max_length=100),
     _: UUID = Depends(get_current_user),
 ):
     try:
         async with httpx.AsyncClient() as client:
-            id_search_url = f"https://rxnav.nlm.nih.gov/REST/rxcui.json?name={medication_term}&search=9&allsrc=0"
-            id_search_response = await client.get(id_search_url, timeout=5)
+            id_search_response = await client.get(
+                "https://rxnav.nlm.nih.gov/REST/rxcui.json",
+                params={"name": medication_term, "search": 9, "allsrc": 0},
+                timeout=5,
+            )
             id_search_response.raise_for_status()
 
             id_array = id_search_response.json().get("idGroup", {}).get("rxnormId")
@@ -151,8 +165,10 @@ async def search_medications(
     return {"data": data}
 
 
-@router.get("/medications/{medication_id}")
+@router.get("/medications/{medication_id}", response_model=DataResponse[MedicationResponse])
+@limiter.limit("30/minute")
 async def get_medication(
+    request: Request,
     medication_id: int,
     _: UUID = Depends(get_current_user),
 ):
@@ -169,8 +185,10 @@ async def get_medication(
     return {"data": response.data[0]}
 
 
-@router.post("/medications")
+@router.post("/medications", response_model=DataResponse[MedicationResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_medication(
+    request: Request,
     medication_record: MedicationRecordCreate,
     _: UUID = Depends(get_current_user),
 ):
@@ -187,11 +205,13 @@ async def add_medication(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.put("/medications/{medication_id}")
+@router.put("/medications/{medication_id}", response_model=DataResponse[MedicationResponse])
+@limiter.limit("15/minute")
 async def update_medication(
+    request: Request,
     medication_id: int,
     updated_record: MedicationRecordUpdate,
     _: UUID = Depends(get_current_user),
@@ -205,24 +225,33 @@ async def update_medication(
         .eq("medication_id", medication_id)
         .execute()
     )
-    return {"data": response.data}
+    if not response.data:
+        raise HTTPException(status_code=404, detail="Medication not found")
+    return {"data": response.data[0]}
 
 
-@router.delete("/medications/{medication_id}")
+@router.delete("/medications/{medication_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_medication(
+    request: Request,
     medication_id: int,
     _: UUID = Depends(get_current_user),
 ):
+    existing = supabase.table("medications").select("medication_id").eq("medication_id", medication_id).execute()
+    if not existing.data:
+        raise HTTPException(status_code=404, detail="Medication not found")
     supabase.table("medications").delete().eq("medication_id", medication_id).execute()
-    return {"success": True}
+    return Response(status_code=204)
 
 
 # ------------------------------------------------------------------
 # Medication stock routes
 # ------------------------------------------------------------------
 
-@router.post("/medications/{medication_id}/stock")
+@router.post("/medications/{medication_id}/stock", response_model=DataResponse[StockRecordResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_medication_to_stock(
+    request: Request,
     medication_id: int,
     stock_record: StockRecordCreate,
     user_id: UUID = Depends(get_current_user),
@@ -234,17 +263,18 @@ async def add_medication_to_stock(
             "medication_id": medication_id,
             "quantity": stock_record.quantity,
             "unit": stock_record.unit,
-            "expiration_date": stock_record.expiration_date.isoformat(),
+            "expiration_date": stock_record.expiration_date.isoformat() if stock_record.expiration_date else None,
             "opened_at": stock_record.opened_at.isoformat() if stock_record.opened_at else None,
             "notes": stock_record.notes,
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/user/medications")
-async def get_all_user_medications(user_id: UUID = Depends(get_current_user)):
+@router.get("/user/medications", response_model=DataResponse[list[StockRecordResponse]])
+@limiter.limit("30/minute")
+async def get_all_user_medications(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("user_medication_stock")
         .select("*")
@@ -254,8 +284,10 @@ async def get_all_user_medications(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data}
 
 
-@router.get("/medications/stock/{stock_id}")
+@router.get("/medications/stock/{stock_id}", response_model=DataResponse[StockRecordResponse])
+@limiter.limit("30/minute")
 async def get_user_medication_stock(
+    request: Request,
     stock_id: int,
     user_id: UUID = Depends(get_current_user),
 ):

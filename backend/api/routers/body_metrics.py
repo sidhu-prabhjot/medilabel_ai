@@ -2,12 +2,14 @@ from decimal import Decimal
 from datetime import datetime, timezone
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from api.db.supabase import supabase
 from api.auth.auth import get_current_user
-from api.schemas.body_metric_record import BodyMetricRecordCreate, BodyMetricRecordUpdate
+from api.schemas.body_metric_record import BodyMetricRecordCreate, BodyMetricRecordUpdate, BodyMetricResponse
+from api.schemas.common import DataResponse
+from api.limiter import limiter
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", tags=["Body Metrics"])
 
 
 # ------------------------------------------------------------------
@@ -41,8 +43,10 @@ def convert_decimals_to_float(data: dict) -> dict:
 # Body metric routes
 # ------------------------------------------------------------------
 
-@router.post("/body-metrics")
+@router.post("/body-metrics", response_model=DataResponse[BodyMetricResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_body_metric(
+    request: Request,
     body_metric_record: BodyMetricRecordCreate,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -57,11 +61,12 @@ async def add_body_metric(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/body-metrics")
-async def get_all_body_metrics(user_id: UUID = Depends(get_current_user)):
+@router.get("/body-metrics", response_model=DataResponse[list[BodyMetricResponse]])
+@limiter.limit("30/minute")
+async def get_all_body_metrics(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("body_metrics")
         .select("*")
@@ -71,8 +76,9 @@ async def get_all_body_metrics(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data}
 
 
-@router.get("/body-metrics/latest")
-async def get_latest_body_metric(user_id: UUID = Depends(get_current_user)):
+@router.get("/body-metrics/latest", response_model=DataResponse[BodyMetricResponse])
+@limiter.limit("30/minute")
+async def get_latest_body_metric(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("body_metrics")
         .select("*")
@@ -88,8 +94,10 @@ async def get_latest_body_metric(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data[0]}
 
 
-@router.put("/body-metrics/{metric_id}")
+@router.put("/body-metrics/{metric_id}", response_model=DataResponse[BodyMetricResponse])
+@limiter.limit("15/minute")
 async def update_body_metric(
+    request: Request,
     metric_id: int,
     updated_record: BodyMetricRecordUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -107,14 +115,16 @@ async def update_body_metric(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/body-metrics/{metric_id}")
+@router.delete("/body-metrics/{metric_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_body_metric(
+    request: Request,
     metric_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_metric_ownership(metric_id, user_id)
     supabase.table("body_metrics").delete().eq("id", metric_id).eq("user_id", str(user_id)).execute()
-    return {"success": True}
+    return Response(status_code=204)

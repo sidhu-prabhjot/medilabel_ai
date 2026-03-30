@@ -1,16 +1,20 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from api.db.supabase import supabase
 from api.auth.auth import get_current_user
 from api.schemas.plan_record import (
     WorkoutPlanCreate,
     WorkoutPlanUpdate,
+    WorkoutPlanResponse,
     PlanRoutineDayCreate,
     PlanRoutineDayUpdate,
+    PlanRoutineDayResponse,
 )
+from api.schemas.common import DataResponse
+from api.limiter import limiter
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/api", tags=["Plans"])
 
 
 # ------------------------------------------------------------------
@@ -75,8 +79,10 @@ def verify_routine_belongs_to_user(routine_id: int, user_id: UUID):
 # Workout plan routes
 # ------------------------------------------------------------------
 
-@router.post("/workout-plans")
+@router.post("/workout-plans", response_model=DataResponse[WorkoutPlanResponse], status_code=201)
+@limiter.limit("15/minute")
 async def create_workout_plan(
+    request: Request,
     plan: WorkoutPlanCreate,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -89,11 +95,12 @@ async def create_workout_plan(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/workout-plans")
-async def get_all_workout_plans(user_id: UUID = Depends(get_current_user)):
+@router.get("/workout-plans", response_model=DataResponse[list[WorkoutPlanResponse]])
+@limiter.limit("30/minute")
+async def get_all_workout_plans(request: Request, user_id: UUID = Depends(get_current_user)):
     response = (
         supabase.table("workout_plans")
         .select("*")
@@ -103,8 +110,10 @@ async def get_all_workout_plans(user_id: UUID = Depends(get_current_user)):
     return {"data": response.data}
 
 
-@router.get("/workout-plans/{plan_id}")
+@router.get("/workout-plans/{plan_id}", response_model=DataResponse[WorkoutPlanResponse])
+@limiter.limit("30/minute")
 async def get_workout_plan(
+    request: Request,
     plan_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -119,8 +128,10 @@ async def get_workout_plan(
     return {"data": response.data[0]}
 
 
-@router.put("/workout-plans/{plan_id}")
+@router.put("/workout-plans/{plan_id}", response_model=DataResponse[WorkoutPlanResponse])
+@limiter.limit("15/minute")
 async def update_workout_plan(
+    request: Request,
     plan_id: int,
     updated_plan: WorkoutPlanUpdate,
     user_id: UUID = Depends(get_current_user),
@@ -136,25 +147,29 @@ async def update_workout_plan(
         .eq("user_id", str(user_id))
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/workout-plans/{plan_id}")
+@router.delete("/workout-plans/{plan_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_workout_plan(
+    request: Request,
     plan_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
     verify_plan_ownership(plan_id, user_id)
     supabase.table("workout_plans").delete().eq("id", plan_id).eq("user_id", str(user_id)).execute()
-    return {"success": True}
+    return Response(status_code=204)
 
 
 # ------------------------------------------------------------------
 # Plan routine day routes
 # ------------------------------------------------------------------
 
-@router.post("/workout-plans/{plan_id}/days")
+@router.post("/workout-plans/{plan_id}/days", response_model=DataResponse[PlanRoutineDayResponse], status_code=201)
+@limiter.limit("15/minute")
 async def add_day_to_plan(
+    request: Request,
     plan_id: int,
     plan_day: PlanRoutineDayCreate,
     user_id: UUID = Depends(get_current_user),
@@ -172,11 +187,13 @@ async def add_day_to_plan(
         })
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.get("/workout-plans/{plan_id}/days")
+@router.get("/workout-plans/{plan_id}/days", response_model=DataResponse[list[PlanRoutineDayResponse]])
+@limiter.limit("30/minute")
 async def get_all_days_in_plan(
+    request: Request,
     plan_id: int,
     user_id: UUID = Depends(get_current_user),
 ):
@@ -192,8 +209,10 @@ async def get_all_days_in_plan(
     return {"data": response.data}
 
 
-@router.get("/workout-plans/{plan_id}/days/{plan_day_id}")
+@router.get("/workout-plans/{plan_id}/days/{plan_day_id}", response_model=DataResponse[PlanRoutineDayResponse])
+@limiter.limit("30/minute")
 async def get_plan_day(
+    request: Request,
     plan_id: int,
     plan_day_id: int,
     user_id: UUID = Depends(get_current_user),
@@ -214,8 +233,10 @@ async def get_plan_day(
     return {"data": response.data[0]}
 
 
-@router.put("/workout-plans/{plan_id}/days/{plan_day_id}")
+@router.put("/workout-plans/{plan_id}/days/{plan_day_id}", response_model=DataResponse[PlanRoutineDayResponse])
+@limiter.limit("15/minute")
 async def update_plan_day(
+    request: Request,
     plan_id: int,
     plan_day_id: int,
     updated_day: PlanRoutineDayUpdate,
@@ -236,11 +257,13 @@ async def update_plan_day(
         .eq("plan_id", plan_id)
         .execute()
     )
-    return {"data": response.data}
+    return {"data": response.data[0]}
 
 
-@router.delete("/workout-plans/{plan_id}/days/{plan_day_id}")
+@router.delete("/workout-plans/{plan_id}/days/{plan_day_id}", status_code=204)
+@limiter.limit("10/minute")
 async def delete_plan_day(
+    request: Request,
     plan_id: int,
     plan_day_id: int,
     user_id: UUID = Depends(get_current_user),
@@ -249,4 +272,4 @@ async def delete_plan_day(
     verify_plan_day_ownership(plan_day_id, user_id)
 
     supabase.table("plan_routine_days").delete().eq("id", plan_day_id).eq("plan_id", plan_id).execute()
-    return {"success": True}
+    return Response(status_code=204)

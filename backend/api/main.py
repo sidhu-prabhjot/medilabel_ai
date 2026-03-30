@@ -6,13 +6,21 @@ from api.routers import auth, medical, workouts, routines, exercises, body_metri
 from postgrest.exceptions import APIError as PostgrestAPIError
 
 # rate limiter
-from slowapi import Limiter, _rate_limit_exceeded_handler
-from slowapi.util import get_remote_address
+from api.limiter import limiter
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
 app.state.limiter = limiter
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],        # change to frontend URL after
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
@@ -25,14 +33,6 @@ async def supabase_error_handler(_request: Request, _exc: PostgrestAPIError):
 @app.exception_handler(Exception)
 async def unhandled_error_handler(_request: Request, _exc: Exception):
     return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred"})
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],        # change to frontend URL after
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 app.include_router(auth.router)
 app.include_router(medical.router)

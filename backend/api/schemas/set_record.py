@@ -2,6 +2,17 @@ from typing import Optional
 from typing_extensions import Annotated
 from decimal import Decimal
 from pydantic import BaseModel, Field
+from datetime import datetime
+
+
+class SetResponse(BaseModel):
+    id: int
+    workout_exercise_id: int
+    reps: int
+    weight_kg: Optional[float]
+    rest_seconds: Optional[int]
+    rpe: Optional[float]
+    created_at: datetime
 
 
 # ------------------------------------------------------------------

@@ -1,11 +1,26 @@
+import html
 from typing import Optional
 from typing_extensions import Annotated
 from decimal import Decimal
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from datetime import datetime
 
 
+class RoutineSetResponse(BaseModel):
+    id: int
+    routine_exercise_id: int
+    set_order: int
+    target_reps: int
+    target_weight: Optional[float]
+    target_rpe: Optional[float]
+    rest_seconds: Optional[int]
+    notes: Optional[str]
+    created_at: datetime
+
+
 class RoutineSetRecordCreate(BaseModel):
+    model_config = {"str_strip_whitespace": True}
+
     set_order: Annotated[int, Field(ge=0)]
     target_reps: Annotated[int, Field(gt=0)]
 
@@ -18,10 +33,19 @@ class RoutineSetRecordCreate(BaseModel):
     ] = None
 
     rest_seconds: Optional[Annotated[int, Field(ge=0)]] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=500)
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def escape_notes(cls, v):
+        if v is None:
+            return v
+        return html.escape(v)
 
 
 class RoutineSetRecordUpdate(BaseModel):
+    model_config = {"str_strip_whitespace": True}
+
     set_order: Optional[Annotated[int, Field(ge=0)]] = None
     target_reps: Optional[Annotated[int, Field(gt=0)]] = None
 
@@ -34,4 +58,11 @@ class RoutineSetRecordUpdate(BaseModel):
     ] = None
 
     rest_seconds: Optional[Annotated[int, Field(ge=0)]] = None
-    notes: Optional[str] = None
+    notes: Optional[str] = Field(None, max_length=500)
+
+    @field_validator("notes", mode="before")
+    @classmethod
+    def escape_notes(cls, v):
+        if v is None:
+            return v
+        return html.escape(v)

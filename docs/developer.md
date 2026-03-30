@@ -56,3 +56,17 @@ Navigate to the app directory inside `frontend/medilabel-ai` and start the dev s
 cd frontend/medilabel-ai
 npm run dev
 ```
+
+## Docker Setup
+
+### Static Build
+
+```bash
+docker compose up --build
+```
+
+### Hot Reload/Dynamic Build
+
+```bash
+docker compose watch
+```
