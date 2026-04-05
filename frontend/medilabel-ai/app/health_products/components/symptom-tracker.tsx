@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import Icon from "../../src/components/icon";
 import { SymptomLog, SymptomLogCreate } from "../../src/types/health_products";
-import { addSymptom, deleteSymptom } from "../../src/api/health_product.api";
+import { addSymptom, deleteSymptom, resolveSymptom } from "../../src/api/health_product.api";
 
 interface Props {
   symptoms: SymptomLog[];
@@ -157,6 +157,7 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
 
   const [showForm, setShowForm] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [resolvingId, setResolvingId] = useState<string | null>(null);
 
   async function handleDelete(symptomId: string) {
     setDeletingId(symptomId);
@@ -165,6 +166,16 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
       onRefresh();
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function handleResolve(symptomId: string) {
+    setResolvingId(symptomId);
+    try {
+      await resolveSymptom(symptomId);
+      onRefresh();
+    } finally {
+      setResolvingId(null);
     }
   }
 
@@ -247,6 +258,22 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
                   })}
                 </p>
               </div>
+
+              {/* Mark resolved — only shown for active symptoms */}
+              {!s.is_resolved && (
+                <button
+                  onClick={() => handleResolve(s.symptom_id)}
+                  disabled={resolvingId === s.symptom_id}
+                  title="Mark as resolved"
+                  className={`p-1.5 rounded-lg flex-shrink-0 transition-colors disabled:opacity-40 ${
+                    dark
+                      ? "hover:bg-emerald-500/15 text-slate-500 hover:text-emerald-400"
+                      : "hover:bg-emerald-50 text-slate-400 hover:text-emerald-600"
+                  }`}
+                >
+                  <Icon name="check_circle" className="text-base" />
+                </button>
+              )}
 
               <button
                 onClick={() => handleDelete(s.symptom_id)}

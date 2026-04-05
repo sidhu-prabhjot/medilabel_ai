@@ -76,3 +76,11 @@ export const addSymptom = async (payload: SymptomLogCreate): Promise<SymptomLog>
 export const deleteSymptom = async (symptomId: string): Promise<void> => {
   await api.delete(`/api/symptoms/${symptomId}`);
 };
+
+// Mark a symptom as resolved via PUT /api/symptoms/{id}
+export const resolveSymptom = async (symptomId: string): Promise<SymptomLog> => {
+  const response = await api.put<ApiResponse<SymptomLog>>(`/api/symptoms/${symptomId}`, {
+    is_resolved: true,
+  });
+  return response.data.data;
+};

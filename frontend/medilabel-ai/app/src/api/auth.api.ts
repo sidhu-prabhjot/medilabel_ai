@@ -17,3 +17,19 @@ export const loginUser = async (
     throw error;
   }
 };
+
+export const signupUser = async (
+  email: string,
+  password: string,
+): Promise<LoginResponse> => {
+  try {
+    const response = await api.post<LoginResponse>("/api/auth/signup", {
+      email,
+      password,
+    });
+
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
