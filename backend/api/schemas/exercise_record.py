@@ -8,7 +8,7 @@ class ExerciseResponse(BaseModel):
     id: int
     exercise_name: str
     muscle_group: str
-    equipment: Optional[str]
+    equipment: Optional[str] = None
     created_at: datetime
 
 

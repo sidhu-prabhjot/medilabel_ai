@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import Icon from "../../src/components/icon";
-import { Exercise, EnrichedWorkout, PersonalRecord } from "../../src/types/workouts";
+import { Exercise, EnrichedWorkout, EnrichedRoutineExercise, PersonalRecord } from "../../src/types/workouts";
 import {
   createWorkout,
   addExerciseToWorkout,
@@ -28,6 +28,7 @@ interface LoggedExercise {
 interface Props {
   exercises: Exercise[];
   previousWorkouts: EnrichedWorkout[];
+  initialPreset: { name: string; exercises: EnrichedRoutineExercise[] } | null;
   onSaved: (newPRs: PersonalRecord[]) => void;
   onExerciseCreated: (exercise: Exercise) => void;
 }

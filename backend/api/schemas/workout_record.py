@@ -10,10 +10,9 @@ class WorkoutResponse(BaseModel):
     user_id: str
     workout_name: str
     workout_date: date
-    duration_minutes: Optional[int]
-    notes: Optional[str]
+    duration_minutes: Optional[int] = None
+    notes: Optional[str] = None
     created_at: datetime
-    updated_at: Optional[datetime]
 
 
 class WorkoutRecordCreate(BaseModel):

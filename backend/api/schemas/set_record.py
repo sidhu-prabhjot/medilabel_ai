@@ -9,9 +9,9 @@ class SetResponse(BaseModel):
     id: int
     workout_exercise_id: int
     reps: int
-    weight_kg: Optional[float]
-    rest_seconds: Optional[int]
-    rpe: Optional[float]
+    weight_kg: Optional[float] = None
+    rest_seconds: Optional[int] = None
+    rpe: Optional[float] = None
     created_at: datetime
 
 

@@ -11,7 +11,6 @@ class WorkoutRoutineResponse(BaseModel):
     routine_name: str
     description: Optional[str]
     created_at: datetime
-    updated_at: Optional[datetime]
 
 
 class WorkoutRoutineCreate(BaseModel):

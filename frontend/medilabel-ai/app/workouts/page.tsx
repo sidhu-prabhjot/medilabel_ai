@@ -27,6 +27,7 @@ import {
   WorkoutRoutine,
   WorkoutPlan,
   EnrichedWorkout,
+  EnrichedRoutineExercise,
   PersonalRecord,
 } from "../src/types/workouts";
 
@@ -81,7 +82,9 @@ export default function WorkoutsPage() {
   const [plans, setPlans] = useState<WorkoutPlan[]>([]);
 
   // Enriched workouts loaded progressively in background for charts/PRs
-  const [enrichedWorkouts, setEnrichedWorkouts] = useState<EnrichedWorkout[]>([]);
+  const [enrichedWorkouts, setEnrichedWorkouts] = useState<EnrichedWorkout[]>(
+    [],
+  );
   const [loadingProgress, setLoadingProgress] = useState(true);
 
   const [loading, setLoading] = useState(true);
@@ -89,6 +92,20 @@ export default function WorkoutsPage() {
 
   // Track PRs announced in the current session to show a banner
   const [sessionPRs, setSessionPRs] = useState<PersonalRecord[]>([]);
+
+  // Preset exercises when starting a workout from a routine
+  const [routinePreset, setRoutinePreset] = useState<{
+    name: string;
+    exercises: EnrichedRoutineExercise[];
+  } | null>(null);
+
+  function handleStartFromRoutine(
+    routineName: string,
+    exercises: EnrichedRoutineExercise[],
+  ) {
+    setRoutinePreset({ name: routineName, exercises });
+    setActiveSection("log");
+  }
 
   // ── Loaders ──────────────────────────────────────────────────────────────────
 
@@ -107,44 +124,52 @@ export default function WorkoutsPage() {
   }, []);
 
   // Load full exercise+set detail for all workouts (background enrichment)
-  const enrichAll = useCallback(async (workoutList: Workout[]) => {
-    setLoadingProgress(true);
-    const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
+  const enrichAll = useCallback(
+    async (workoutList: Workout[]) => {
+      setLoadingProgress(true);
+      const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
 
-    const results = await Promise.allSettled(
-      workoutList.map(async (w) => {
-        const wes = await getWorkoutExercises(w.id);
-        const enrichedExercises = await Promise.all(
-          wes.map(async (we) => {
-            const sets = await getSets(we.id);
-            return {
-              workoutExercise: we,
-              exercise: exerciseMap.get(we.exercise_id) ?? {
-                id: we.exercise_id,
-                exercise_name: `Exercise #${we.exercise_id}`,
-                muscle_group: "Unknown",
-                equipment: null,
-              },
-              sets,
-            };
-          }),
-        );
-        return {
-          workout: w,
-          exercises: enrichedExercises.sort(
-            (a, b) => (a.workoutExercise.order_index ?? 0) - (b.workoutExercise.order_index ?? 0),
-          ),
-        } as EnrichedWorkout;
-      }),
-    );
+      const results = await Promise.allSettled(
+        workoutList.map(async (w) => {
+          const wes = await getWorkoutExercises(w.id);
+          const enrichedExercises = await Promise.all(
+            wes.map(async (we) => {
+              const sets = await getSets(we.id);
+              return {
+                workoutExercise: we,
+                exercise: exerciseMap.get(we.exercise_id) ?? {
+                  id: we.exercise_id,
+                  exercise_name: `Exercise #${we.exercise_id}`,
+                  muscle_group: "Unknown",
+                  equipment: null,
+                },
+                sets,
+              };
+            }),
+          );
+          return {
+            workout: w,
+            exercises: enrichedExercises.sort(
+              (a, b) =>
+                (a.workoutExercise.order_index ?? 0) -
+                (b.workoutExercise.order_index ?? 0),
+            ),
+          } as EnrichedWorkout;
+        }),
+      );
 
-    const fulfilled = results
-      .filter((r): r is PromiseFulfilledResult<EnrichedWorkout> => r.status === "fulfilled")
-      .map((r) => r.value);
+      const fulfilled = results
+        .filter(
+          (r): r is PromiseFulfilledResult<EnrichedWorkout> =>
+            r.status === "fulfilled",
+        )
+        .map((r) => r.value);
 
-    setEnrichedWorkouts(fulfilled);
-    setLoadingProgress(false);
-  }, [exercises]);
+      setEnrichedWorkouts(fulfilled);
+      setLoadingProgress(false);
+    },
+    [exercises],
+  );
 
   const refreshWorkouts = useCallback(async () => {
     const w = await getWorkouts();
@@ -213,12 +238,16 @@ export default function WorkoutsPage() {
               <div
                 key={i}
                 className={`rounded-xl border p-5 h-28 animate-pulse ${
-                  dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+                  dark
+                    ? "bg-slate-800 border-slate-700"
+                    : "bg-white border-slate-200"
                 }`}
               />
             ))}
           </div>
-          <div className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`} />
+          <div
+            className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}
+          />
         </div>
       </AppLayout>
     );
@@ -238,14 +267,25 @@ export default function WorkoutsPage() {
 
         {/* Session PR banner */}
         {sessionPRs.length > 0 && (
-          <div className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-emerald-500/10 border-emerald-500/30" : "bg-emerald-50 border-emerald-200"}`}>
-            <Icon name="emoji_events" className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-emerald-400" : "text-emerald-600"}`} />
+          <div
+            className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-emerald-500/10 border-emerald-500/30" : "bg-emerald-50 border-emerald-200"}`}
+          >
+            <Icon
+              name="emoji_events"
+              className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-emerald-400" : "text-emerald-600"}`}
+            />
             <div className="flex-1">
-              <p className={`text-sm font-semibold mb-1 ${dark ? "text-emerald-300" : "text-emerald-800"}`}>
-                New Personal Record{sessionPRs.length > 1 ? "s" : ""} this session!
+              <p
+                className={`text-sm font-semibold mb-1 ${dark ? "text-emerald-300" : "text-emerald-800"}`}
+              >
+                New Personal Record{sessionPRs.length > 1 ? "s" : ""} this
+                session!
               </p>
               {sessionPRs.map((pr) => (
-                <p key={pr.exercise.id} className={`text-sm ${dark ? "text-emerald-200" : "text-emerald-900"}`}>
+                <p
+                  key={pr.exercise.id}
+                  className={`text-sm ${dark ? "text-emerald-200" : "text-emerald-900"}`}
+                >
                   {pr.exercise.exercise_name} — {pr.maxWeightKg} kg
                   {pr.repsAtMax > 0 ? ` × ${pr.repsAtMax}` : ""}
                 </p>
@@ -261,7 +301,9 @@ export default function WorkoutsPage() {
         )}
 
         {/* Section nav */}
-        <div className={`flex gap-1 p-1 rounded-xl ${dark ? "bg-slate-800" : "bg-slate-100"}`}>
+        <div
+          className={`flex gap-1 p-1 rounded-xl ${dark ? "bg-slate-800" : "bg-slate-100"}`}
+        >
           {SECTIONS.map((s) => (
             <button
               key={s.id}
@@ -287,11 +329,15 @@ export default function WorkoutsPage() {
         {activeSection === "log" && (
           <Card>
             <div className="flex items-center justify-between mb-5">
-              <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+              <h2
+                className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}
+              >
                 Log a Workout
               </h2>
               {exercises.length === 0 && (
-                <span className={`text-xs ${dark ? "text-amber-400" : "text-amber-600"}`}>
+                <span
+                  className={`text-xs ${dark ? "text-amber-400" : "text-amber-600"}`}
+                >
                   Add exercises to the library first
                 </span>
               )}
@@ -299,7 +345,9 @@ export default function WorkoutsPage() {
             <WorkoutLogger
               exercises={exercises}
               previousWorkouts={enrichedWorkouts}
+              initialPreset={routinePreset}
               onSaved={(prs) => {
+                setRoutinePreset(null);
                 if (prs.length > 0) setSessionPRs(prs);
                 refreshWorkouts();
               }}
@@ -311,10 +359,14 @@ export default function WorkoutsPage() {
         {activeSection === "history" && (
           <Card>
             <div className="flex items-center justify-between mb-4">
-              <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+              <h2
+                className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}
+              >
                 Workout History
               </h2>
-              <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${dark ? "bg-slate-700 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
+              <span
+                className={`text-xs font-medium px-2 py-0.5 rounded-full ${dark ? "bg-slate-700 text-slate-400" : "bg-slate-100 text-slate-500"}`}
+              >
                 {workouts.length}
               </span>
             </div>
@@ -341,6 +393,7 @@ export default function WorkoutsPage() {
               exercises={exercises}
               onRefresh={refreshRoutines}
               onExerciseCreated={(e) => setExercises((prev) => [...prev, e])}
+              onStartWorkout={() => console.log("onStartWorkout")}
             />
           </Card>
         )}

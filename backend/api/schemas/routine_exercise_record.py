@@ -10,7 +10,7 @@ class RoutineExerciseResponse(BaseModel):
     routine_id: int
     exercise_id: int
     order_index: int
-    notes: Optional[str]
+    notes: Optional[str] = None
     created_at: datetime
 
 

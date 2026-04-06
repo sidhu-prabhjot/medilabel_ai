@@ -255,6 +255,7 @@ async def add_set_to_routine_exercise(
             "target_reps": routine_set_record.target_reps,
             "target_weight": float(routine_set_record.target_weight) if routine_set_record.target_weight else None,
             "target_rpe": float(routine_set_record.target_rpe) if routine_set_record.target_rpe else None,
+            "rest_seconds": int(routine_set_record.rest_seconds) if routine_set_record.rest_seconds else None,
             "set_order": routine_set_record.set_order,
         })
         .execute()

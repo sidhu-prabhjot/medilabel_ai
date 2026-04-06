@@ -10,11 +10,11 @@ class BodyMetricResponse(BaseModel):
     id: int
     user_id: str
     weight_kg: float
-    body_fat_percent: Optional[float]
+    body_fat_percent: Optional[float] = None
     recorded_at: datetime
-    notes: Optional[str]
+    notes: Optional[str] = None
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
 
 
 class BodyMetricRecordCreate(BaseModel):

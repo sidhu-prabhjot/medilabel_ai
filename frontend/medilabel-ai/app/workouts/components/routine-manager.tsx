@@ -27,6 +27,7 @@ interface Props {
   exercises: Exercise[];
   onRefresh: () => void;
   onExerciseCreated: (exercise: Exercise) => void;
+  onStartWorkout: (routineName: string, exercises: EnrichedRoutineExercise[]) => void;
 }
 
 // ── Target set row form ────────────────────────────────────────────────────────
@@ -99,12 +100,14 @@ function RoutineCard({
   exercises,
   onDeleted,
   onExerciseCreated,
+  onStartWorkout,
   dark,
 }: {
   routine: WorkoutRoutine;
   exercises: Exercise[];
   onDeleted: () => void;
   onExerciseCreated: (exercise: Exercise) => void;
+  onStartWorkout: (routineName: string, exercises: EnrichedRoutineExercise[]) => void;
   dark: boolean;
 }) {
   const heading = dark ? "text-white" : "text-slate-900";
@@ -193,6 +196,17 @@ function RoutineCard({
     await refreshExercises();
   }
 
+  async function handleDuplicateSet(s: RoutineSet, routineExerciseId: number, nextOrder: number) {
+    await addRoutineSet(routineExerciseId, {
+      set_order: nextOrder,
+      target_reps: s.target_reps,
+      target_weight: s.target_weight ?? undefined,
+      target_rpe: s.target_rpe ?? undefined,
+      rest_seconds: s.rest_seconds ?? undefined,
+    });
+    await refreshExercises();
+  }
+
   const alreadyAdded = new Set(routineExercises.map((e) => e.exercise.id));
 
   return (
@@ -216,15 +230,55 @@ function RoutineCard({
             <span className={`text-xs ${muted}`}>{routine.description}</span>
           )}
         </div>
-        <button
-          onClick={onDeleted}
-          title="Delete routine"
-          className={`p-1.5 rounded-lg transition-colors ${
-            dark ? "hover:bg-red-500/15 text-slate-500 hover:text-red-400" : "hover:bg-red-50 text-slate-400 hover:text-red-500"
-          }`}
-        >
-          <Icon name="delete" className="text-base" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={async () => {
+              let exToUse = routineExercises;
+              if (!expanded || exToUse.length === 0) {
+                setLoadingDetail(true);
+                try {
+                  const res = await getRoutineExercises(routine.id);
+                  exToUse = await Promise.all(
+                    res.map(async (re: RoutineExercise) => {
+                      const sets = await getRoutineSets(re.id);
+                      return {
+                        routineExercise: re,
+                        exercise: exerciseMap.get(re.exercise_id) ?? {
+                          id: re.exercise_id,
+                          exercise_name: `Exercise #${re.exercise_id}`,
+                          muscle_group: "Unknown",
+                          equipment: null,
+                        },
+                        sets,
+                      };
+                    }),
+                  );
+                } finally {
+                  setLoadingDetail(false);
+                }
+              }
+              onStartWorkout(routine.routine_name, exToUse);
+            }}
+            title="Start workout from this routine"
+            className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              dark
+                ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
+                : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+            }`}
+          >
+            <Icon name="play_arrow" className="text-sm" />
+            Start
+          </button>
+          <button
+            onClick={onDeleted}
+            title="Delete routine"
+            className={`p-1.5 rounded-lg transition-colors ${
+              dark ? "hover:bg-red-500/15 text-slate-500 hover:text-red-400" : "hover:bg-red-50 text-slate-400 hover:text-red-500"
+            }`}
+          >
+            <Icon name="delete" className="text-base" />
+          </button>
+        </div>
       </div>
 
       {/* Expanded detail */}
@@ -258,26 +312,42 @@ function RoutineCard({
 
               {/* Target sets */}
               {ee.sets.length > 0 && (
-                <div className="space-y-1 mb-2">
-                  <div className={`grid grid-cols-5 gap-2 text-xs font-medium text-center ${muted}`}>
-                    <span>Reps</span><span>Weight</span><span>RPE</span><span>Rest</span><span />
+                <div className={`mb-2 rounded-lg overflow-hidden border ${dark ? "border-slate-700" : "border-slate-200"}`}>
+                  <div className={`grid grid-cols-6 gap-2 px-3 py-1.5 text-xs font-semibold text-center ${dark ? "bg-slate-700/60 text-slate-400" : "bg-slate-100 text-slate-500"}`}>
+                    <span>#</span><span>Reps</span><span>Weight</span><span>RPE</span><span>Rest</span><span />
                   </div>
                   {ee.sets
                     .sort((a: RoutineSet, b: RoutineSet) => a.set_order - b.set_order)
-                    .map((s: RoutineSet) => (
-                      <div key={s.id} className={`grid grid-cols-5 gap-2 text-xs text-center ${muted}`}>
-                        <span className={heading}>{s.target_reps}</span>
-                        <span>{s.target_weight ? `${s.target_weight} kg` : "—"}</span>
-                        <span>{s.target_rpe ?? "—"}</span>
-                        <span>{s.rest_seconds ? `${s.rest_seconds}s` : "—"}</span>
-                        <button
-                          onClick={() => handleDeleteSet(s.id)}
-                          className={`flex justify-center transition-colors ${
-                            dark ? "text-slate-600 hover:text-red-400" : "text-slate-300 hover:text-red-500"
-                          }`}
-                        >
-                          <Icon name="remove" className="text-sm" />
-                        </button>
+                    .map((s: RoutineSet, idx: number) => (
+                      <div
+                        key={s.id}
+                        className={`grid grid-cols-6 gap-2 px-3 py-2 text-xs text-center items-center ${
+                          idx % 2 === 0
+                            ? dark ? "bg-slate-800" : "bg-white"
+                            : dark ? "bg-slate-700/25" : "bg-slate-50"
+                        }`}
+                      >
+                        <span className={`font-semibold ${dark ? "text-slate-500" : "text-slate-400"}`}>{idx + 1}</span>
+                        <span className={`font-medium ${heading}`}>{s.target_reps}</span>
+                        <span className={muted}>{s.target_weight ? `${s.target_weight} kg` : "—"}</span>
+                        <span className={muted}>{s.target_rpe ?? "—"}</span>
+                        <span className={muted}>{s.rest_seconds ? `${s.rest_seconds}s` : "—"}</span>
+                        <div className="flex items-center justify-center gap-1.5">
+                          <button
+                            onClick={() => handleDuplicateSet(s, ee.routineExercise.id, ee.sets.length)}
+                            title="Duplicate set"
+                            className={`transition-colors ${dark ? "text-slate-600 hover:text-indigo-400" : "text-slate-300 hover:text-indigo-500"}`}
+                          >
+                            <Icon name="content_copy" className="text-sm" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSet(s.id)}
+                            title="Delete set"
+                            className={`transition-colors ${dark ? "text-slate-600 hover:text-red-400" : "text-slate-300 hover:text-red-500"}`}
+                          >
+                            <Icon name="delete" className="text-sm" />
+                          </button>
+                        </div>
                       </div>
                     ))}
                 </div>
@@ -321,7 +391,7 @@ function RoutineCard({
 
 // ── Main component ─────────────────────────────────────────────────────────────
 
-export default function RoutineManager({ routines, exercises, onRefresh, onExerciseCreated }: Props) {
+export default function RoutineManager({ routines, exercises, onRefresh, onExerciseCreated, onStartWorkout }: Props) {
   const { dark } = useTheme();
   const heading = dark ? "text-white" : "text-slate-900";
   const muted = dark ? "text-slate-400" : "text-slate-500";
@@ -426,6 +496,7 @@ export default function RoutineManager({ routines, exercises, onRefresh, onExerc
               exercises={exercises}
               dark={dark}
               onExerciseCreated={onExerciseCreated}
+              onStartWorkout={onStartWorkout}
               onDeleted={() => {
                 if (deletingId) return;
                 handleDelete(r.id);

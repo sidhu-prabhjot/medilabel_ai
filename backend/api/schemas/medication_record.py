@@ -7,10 +7,10 @@ class MedicationResponse(BaseModel):
     medication_id: int
     rxcui: str
     name: str
-    generic_rxcui: Optional[str]
+    generic_rxcui: Optional[str] = None
     is_brand: bool
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
 
 
 class MedicationRecordCreate(BaseModel):

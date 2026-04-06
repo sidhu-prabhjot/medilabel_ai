@@ -11,10 +11,10 @@ class RoutineSetResponse(BaseModel):
     routine_exercise_id: int
     set_order: int
     target_reps: int
-    target_weight: Optional[float]
-    target_rpe: Optional[float]
-    rest_seconds: Optional[int]
-    notes: Optional[str]
+    target_weight: Optional[float] = None
+    target_rpe: Optional[float] = None
+    rest_seconds: Optional[int] = None
+    notes: Optional[str] = None
     created_at: datetime
 
 

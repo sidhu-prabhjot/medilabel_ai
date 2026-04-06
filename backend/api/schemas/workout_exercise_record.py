@@ -10,7 +10,7 @@ class WorkoutExerciseResponse(BaseModel):
     id: int
     workout_id: int
     exercise_id: int
-    order_index: Optional[int]
+    order_index: Optional[int] = None
     created_at: datetime
 
 

@@ -8,11 +8,11 @@ class StockRecordResponse(BaseModel):
     stock_id: int
     user_id: str
     medication_id: int
-    quantity: Optional[int]
-    unit: Optional[str]
-    expiration_date: Optional[date]
-    opened_at: Optional[date]
-    notes: Optional[str]
+    quantity: Optional[int] = None
+    unit: Optional[str] = None
+    expiration_date: Optional[date] = None
+    opened_at: Optional[date] = None
+    notes: Optional[str] = None
     created_at: datetime
 
 

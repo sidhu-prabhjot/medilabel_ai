@@ -13,17 +13,6 @@ from slowapi.errors import RateLimitExceeded
 app = FastAPI()
 app.state.limiter = limiter
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],        # change to frontend URL after
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
-
-
 @app.middleware("http")
 async def add_security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -32,16 +21,31 @@ async def add_security_headers(request: Request, call_next):
     response.headers["Strict-Transport-Security"] = "max-age=31536000"
     return response
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],        # change to frontend URL after
+    allow_credentials=False,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "*",
+    "Access-Control-Allow-Headers": "*",
+}
 
 #these two exception handlers catch uncaught errors that propogated up
 @app.exception_handler(PostgrestAPIError)
 async def supabase_error_handler(_request: Request, _exc: PostgrestAPIError):
-    return JSONResponse(status_code=500, content={"detail": "A database error occurred"})
+    return JSONResponse(status_code=500, content={"detail": "A database error occurred"}, headers=CORS_HEADERS)
 
 
 @app.exception_handler(Exception)
 async def unhandled_error_handler(_request: Request, _exc: Exception):
-    return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred"})
+    return JSONResponse(status_code=500, content={"detail": "An unexpected error occurred"}, headers=CORS_HEADERS)
 
 app.include_router(auth.router)
 app.include_router(medical.router)

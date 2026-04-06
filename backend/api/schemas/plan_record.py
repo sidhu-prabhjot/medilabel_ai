@@ -10,9 +10,8 @@ class WorkoutPlanResponse(BaseModel):
     id: int
     user_id: str
     name: str
-    description: Optional[str]
+    description: Optional[str] = None
     created_at: datetime
-    updated_at: Optional[datetime]
 
 
 class PlanRoutineDayResponse(BaseModel):
@@ -20,7 +19,7 @@ class PlanRoutineDayResponse(BaseModel):
     plan_id: int
     routine_id: int
     weekday: int
-    notes: Optional[str]
+    notes: Optional[str] = None
     created_at: datetime
 
 

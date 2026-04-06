@@ -59,7 +59,9 @@ def verify_workout_exercise_ownership(workout_exercise_id: int, user_id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Workout exercise not found")
 
-    if str(user_id) != result.data[0]["workouts"][0]["user_id"]:
+    workout = result.data[0]["workouts"]
+    workout_user_id = workout[0]["user_id"] if isinstance(workout, list) else workout["user_id"]
+    if str(user_id) != workout_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 
@@ -83,7 +85,11 @@ def verify_set_ownership(set_id: int, user_id: UUID):
     if not result.data:
         raise HTTPException(status_code=404, detail="Set not found")
 
-    if str(user_id) != result.data[0]["workout_exercises"][0]["workouts"][0]["user_id"]:
+    we = result.data[0]["workout_exercises"]
+    we = we[0] if isinstance(we, list) else we
+    workout = we["workouts"]
+    workout_user_id = workout[0]["user_id"] if isinstance(workout, list) else workout["user_id"]
+    if str(user_id) != workout_user_id:
         raise HTTPException(status_code=403, detail="Not authorized")
 
 

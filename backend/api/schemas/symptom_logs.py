@@ -9,10 +9,10 @@ class SymptomLogResponse(BaseModel):
     user_id: str
     symptom: str
     severity: int
-    notes: Optional[str]
+    notes: Optional[str] = None
     is_resolved: bool
     created_at: datetime
-    updated_at: Optional[datetime]
+    updated_at: Optional[datetime] = None
 
 #only need sanitization when creating and updating, response is just reading
 class SymptomLogCreate(BaseModel):
