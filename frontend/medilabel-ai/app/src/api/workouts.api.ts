@@ -26,8 +26,8 @@ export const createExercise = async (payload: {
   muscle_group: string;
   equipment?: string;
 }): Promise<Exercise> => {
-  const res = await api.post<ApiResponse<Exercise[]>>("/api/exercises", payload);
-  return res.data.data[0];
+  const res = await api.post<ApiResponse<Exercise>>("/api/exercises", payload);
+  return res.data.data;
 };
 
 // ── Workouts ───────────────────────────────────────────────────────────────────

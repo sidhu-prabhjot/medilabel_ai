@@ -24,9 +24,9 @@ async def create_exercise(
     response = (
         supabase.table("exercises")
         .insert({
-            "exercise_name": exercise_record.exercise_name,
-            "muscle_group": exercise_record.muscle_group,
-            "equipment": exercise_record.equipment,
+            "exercise_name": exercise_record.exercise_name.lower(),
+            "muscle_group": exercise_record.muscle_group.lower(),
+            "equipment": exercise_record.equipment.lower(),
         })
         .execute()
     )
