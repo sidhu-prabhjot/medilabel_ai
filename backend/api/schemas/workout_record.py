@@ -31,6 +31,8 @@ class WorkoutRecordCreate(BaseModel):
 
     notes: Optional[str] = Field(None, max_length=500)
 
+    routine_id: Optional[int] = None
+
     @field_validator("notes", mode="before")
     @classmethod
     def escape_notes(cls, v):

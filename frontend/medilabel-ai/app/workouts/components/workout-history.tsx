@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import Icon from "../../src/components/icon";
 import {
@@ -50,6 +50,8 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [range, setRange] = useState<"all" | "month" | "week">("all");
 
   const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
 
@@ -114,12 +116,67 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
     );
   }
 
-  const sorted = [...workouts].sort(
-    (a, b) => new Date(b.workout_date).getTime() - new Date(a.workout_date).getTime(),
-  );
+  const sorted = useMemo(() => {
+    const now = new Date();
+    const cutoffs: Record<"all" | "month" | "week", Date | null> = {
+      all: null,
+      month: new Date(now.getFullYear(), now.getMonth() - 1, now.getDate()),
+      week: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
+    };
+    const cutoff = cutoffs[range];
+    const q = search.toLowerCase();
+
+    return [...workouts]
+      .sort((a, b) => new Date(b.workout_date).getTime() - new Date(a.workout_date).getTime())
+      .filter((w) => {
+        if (cutoff && new Date(w.workout_date) < cutoff) return false;
+        if (q && !w.workout_name.toLowerCase().includes(q)) return false;
+        return true;
+      });
+  }, [workouts, search, range]);
+
+  const rangeLabels: { value: "all" | "month" | "week"; label: string }[] = [
+    { value: "all", label: "All Time" },
+    { value: "month", label: "30 Days" },
+    { value: "week", label: "This Week" },
+  ];
 
   return (
     <div>
+      {/* Search + date range filter */}
+      <div className="flex items-center gap-2 mb-4 flex-wrap">
+        <div className="relative flex-1 min-w-[160px]">
+          <Icon name="search" className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none ${muted}`} />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search workouts…"
+            className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-sm transition-colors ${
+              dark
+                ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
+                : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+            }`}
+          />
+        </div>
+        <div className="flex items-center gap-1">
+          {rangeLabels.map((r) => (
+            <button
+              key={r.value}
+              onClick={() => setRange(r.value)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                range === r.value
+                  ? "bg-indigo-600 text-white"
+                  : dark
+                    ? "bg-slate-700 text-slate-400 hover:text-slate-200"
+                    : "bg-slate-100 text-slate-500 hover:text-slate-700"
+              }`}
+            >
+              {r.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Table header */}
       <div className={`hidden md:grid grid-cols-12 gap-2 pb-2 border-b text-xs font-medium uppercase tracking-wide ${muted} ${divider}`}>
         <span className="col-span-4">Workout</span>
@@ -128,6 +185,10 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
         <span className="col-span-2 text-right">Volume</span>
         <span className="col-span-1" />
       </div>
+
+      {sorted.length === 0 && (
+        <p className={`text-sm text-center py-8 ${muted}`}>No workouts match your search.</p>
+      )}
 
       <div className="divide-y" style={{ borderColor: dark ? "#334155" : "#f1f5f9" }}>
         {sorted.map((w) => {

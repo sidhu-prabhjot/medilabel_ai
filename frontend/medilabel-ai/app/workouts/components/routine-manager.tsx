@@ -27,7 +27,7 @@ interface Props {
   exercises: Exercise[];
   onRefresh: () => void;
   onExerciseCreated: (exercise: Exercise) => void;
-  onStartWorkout: (routineName: string, exercises: EnrichedRoutineExercise[]) => void;
+  onStartWorkout: (routineId: number, routineName: string, exercises: EnrichedRoutineExercise[]) => void;
 }
 
 // ── Target set row form ────────────────────────────────────────────────────────
@@ -107,7 +107,7 @@ function RoutineCard({
   exercises: Exercise[];
   onDeleted: () => void;
   onExerciseCreated: (exercise: Exercise) => void;
-  onStartWorkout: (routineName: string, exercises: EnrichedRoutineExercise[]) => void;
+  onStartWorkout: (routineId: number, routineName: string, exercises: EnrichedRoutineExercise[]) => void;
   dark: boolean;
 }) {
   const heading = dark ? "text-white" : "text-slate-900";
@@ -257,7 +257,7 @@ function RoutineCard({
                   setLoadingDetail(false);
                 }
               }
-              onStartWorkout(routine.routine_name, exToUse);
+              onStartWorkout(routine.id, routine.routine_name, exToUse);
             }}
             title="Start workout from this routine"
             className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${

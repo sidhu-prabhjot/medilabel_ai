@@ -3,13 +3,17 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import Icon from "../../src/components/icon";
-import { WorkoutPlan, WorkoutRoutine, PlanRoutineDay } from "../../src/types/workouts";
+import { WorkoutPlan, WorkoutRoutine, PlanRoutineDay, PlanRestDay } from "../../src/types/workouts";
 import {
   createPlan,
   deletePlan,
+  activatePlan,
   getPlanDays,
   addPlanDay,
   deletePlanDay,
+  getPlanRestDays,
+  addRestDay,
+  deleteRestDay,
 } from "../../src/api/workouts.api";
 
 interface Props {
@@ -25,6 +29,7 @@ const DAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 function DayCell({
   weekday,
   assignments,
+  restDay,
   routines,
   planId,
   onChanged,
@@ -32,6 +37,7 @@ function DayCell({
 }: {
   weekday: number;
   assignments: PlanRoutineDay[];
+  restDay: PlanRestDay | null;
   routines: WorkoutRoutine[];
   planId: number;
   onChanged: () => void;
@@ -40,6 +46,7 @@ function DayCell({
   const muted = dark ? "text-slate-400" : "text-slate-500";
   const [showPicker, setShowPicker] = useState(false);
   const [adding, setAdding] = useState(false);
+  const [togglingRest, setTogglingRest] = useState(false);
 
   const routineMap = new Map(routines.map((r) => [r.id, r]));
 
@@ -59,22 +66,61 @@ function DayCell({
     onChanged();
   }
 
+  async function handleToggleRest() {
+    setTogglingRest(true);
+    try {
+      if (restDay) {
+        await deleteRestDay(planId, restDay.id);
+      } else {
+        await addRestDay(planId, weekday);
+      }
+      onChanged();
+    } finally {
+      setTogglingRest(false);
+    }
+  }
+
   const assignedRoutineIds = new Set(assignments.map((a) => a.routine_id));
   const availableRoutines = routines.filter((r) => !assignedRoutineIds.has(r.id));
+  const isRest = restDay !== null;
 
   return (
     <div
       className={`flex flex-col gap-1.5 min-h-[6rem] rounded-xl border p-3 transition-colors ${
-        dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+        isRest
+          ? dark ? "bg-slate-800/50 border-slate-700 opacity-60" : "bg-slate-50 border-slate-200 opacity-70"
+          : dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
       }`}
     >
       {/* Day label */}
-      <span className={`text-xs font-semibold uppercase tracking-wide ${muted}`}>
-        {DAYS[weekday]}
-      </span>
+      <div className="flex items-center justify-between">
+        <span className={`text-xs font-semibold uppercase tracking-wide ${muted}`}>
+          {DAYS[weekday]}
+        </span>
+        {/* Rest toggle — only show when no routines assigned, or already rest */}
+        {(isRest || assignments.length === 0) && (
+          <button
+            onClick={handleToggleRest}
+            disabled={togglingRest}
+            title={isRest ? "Unmark rest day" : "Mark as rest day"}
+            className={`text-xs transition-colors disabled:opacity-40 ${
+              isRest
+                ? dark ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"
+                : dark ? "text-slate-600 hover:text-slate-400" : "text-slate-300 hover:text-slate-500"
+            }`}
+          >
+            <Icon name={isRest ? "close" : "hotel"} className="text-sm" />
+          </button>
+        )}
+      </div>
 
-      {/* Assigned routines */}
-      {assignments.map((a) => {
+      {/* Rest day badge */}
+      {isRest && (
+        <span className={`text-xs font-medium ${muted}`}>Rest day</span>
+      )}
+
+      {/* Assigned routines (hidden on rest days) */}
+      {!isRest && assignments.map((a) => {
         const routine = routineMap.get(a.routine_id);
         return (
           <div
@@ -94,8 +140,8 @@ function DayCell({
         );
       })}
 
-      {/* Add button / picker */}
-      {availableRoutines.length > 0 && (
+      {/* Add button / picker (hidden on rest days) */}
+      {!isRest && availableRoutines.length > 0 && (
         showPicker ? (
           <div className={`rounded-lg border space-y-0.5 overflow-hidden ${dark ? "border-slate-600" : "border-slate-200"}`}>
             {availableRoutines.map((r) => (
@@ -142,6 +188,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
     plans[0]?.id ?? null,
   );
   const [planDays, setPlanDays] = useState<PlanRoutineDay[]>([]);
+  const [planRestDays, setPlanRestDays] = useState<PlanRestDay[]>([]);
   const [loadingDays, setLoadingDays] = useState(false);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
@@ -149,13 +196,18 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
   const [planDesc, setPlanDesc] = useState("");
   const [creating, setCreating] = useState(false);
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [activatingId, setActivatingId] = useState<number | null>(null);
 
   const loadDays = useCallback(async () => {
-    if (!selectedPlanId) { setPlanDays([]); return; }
+    if (!selectedPlanId) { setPlanDays([]); setPlanRestDays([]); return; }
     setLoadingDays(true);
     try {
-      const days = await getPlanDays(selectedPlanId);
+      const [days, restDays] = await Promise.all([
+        getPlanDays(selectedPlanId),
+        getPlanRestDays(selectedPlanId),
+      ]);
       setPlanDays(days);
+      setPlanRestDays(restDays);
     } finally {
       setLoadingDays(false);
     }
@@ -199,6 +251,16 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
     }
   }
 
+  async function handleActivatePlan(planId: number) {
+    setActivatingId(planId);
+    try {
+      await activatePlan(planId);
+      onRefresh();
+    } finally {
+      setActivatingId(null);
+    }
+  }
+
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 
   // Group plan days by weekday
@@ -206,6 +268,12 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
   for (let i = 0; i < 7; i++) dayMap.set(i, []);
   for (const d of planDays) {
     dayMap.get(d.weekday)?.push(d);
+  }
+
+  // Map weekday → rest day row (for O(1) lookup in DayCell)
+  const restDayMap = new Map<number, PlanRestDay>();
+  for (const rd of planRestDays) {
+    restDayMap.set(rd.weekday, rd);
   }
 
   return (
@@ -262,18 +330,29 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
             <div key={p.id} className="flex items-center gap-1">
               <button
                 onClick={() => setSelectedPlanId(p.id)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                   selectedPlanId === p.id
-                    ? dark
-                      ? "bg-indigo-500/20 text-indigo-300"
-                      : "bg-indigo-50 text-indigo-700"
-                    : dark
-                      ? "text-slate-400 hover:bg-slate-700"
-                      : "text-slate-500 hover:bg-slate-100"
+                    ? dark ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-50 text-indigo-700"
+                    : dark ? "text-slate-400 hover:bg-slate-700" : "text-slate-500 hover:bg-slate-100"
                 }`}
               >
+                {p.is_active && (
+                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dark ? "bg-emerald-400" : "bg-emerald-500"}`} />
+                )}
                 {p.name}
               </button>
+              {!p.is_active && (
+                <button
+                  onClick={() => handleActivatePlan(p.id)}
+                  disabled={activatingId === p.id}
+                  title="Set as active plan"
+                  className={`p-1 rounded-lg text-xs transition-colors disabled:opacity-40 ${
+                    dark ? "text-slate-500 hover:text-emerald-400" : "text-slate-400 hover:text-emerald-600"
+                  }`}
+                >
+                  <Icon name="check_circle" className="text-sm" />
+                </button>
+              )}
               <button
                 onClick={() => handleDeletePlan(p.id)}
                 disabled={deletingId === p.id}
@@ -304,6 +383,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
                 key={i}
                 weekday={i}
                 assignments={dayMap.get(i) ?? []}
+                restDay={restDayMap.get(i) ?? null}
                 routines={routines}
                 planId={selectedPlan.id}
                 onChanged={loadDays}

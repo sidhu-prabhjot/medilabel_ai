@@ -25,6 +25,7 @@ export interface WorkoutCreate {
   workout_date: string;
   duration_minutes?: number;
   notes?: string;
+  routine_id?: number;
 }
 
 // ── Workout exercise (exercise entry within a logged workout) ──────────────────
@@ -114,6 +115,7 @@ export interface WorkoutPlan {
   user_id: string;
   name: string;
   description: string | null;
+  is_active: boolean;
   created_at: string;
 }
 
@@ -123,6 +125,12 @@ export interface PlanRoutineDay {
   routine_id: number;
   weekday: number; // 0 = Monday … 6 = Sunday
   notes: string | null;
+}
+
+export interface PlanRestDay {
+  id: number;
+  plan_id: number;
+  weekday: number; // 0 = Monday … 6 = Sunday
 }
 
 // ── Progress & PRs (derived client-side) ─────────────────────────────────────

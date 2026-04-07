@@ -11,6 +11,7 @@ class WorkoutPlanResponse(BaseModel):
     user_id: str
     name: str
     description: Optional[str] = None
+    is_active: bool = False
     created_at: datetime
 
 
@@ -21,6 +22,16 @@ class PlanRoutineDayResponse(BaseModel):
     weekday: int
     notes: Optional[str] = None
     created_at: datetime
+
+
+class PlanRestDayResponse(BaseModel):
+    id: int
+    plan_id: int
+    weekday: int
+
+
+class PlanRestDayCreate(BaseModel):
+    weekday: Annotated[int, Field(ge=0, le=6)]
 
 
 # ------------------------------------------------------------------

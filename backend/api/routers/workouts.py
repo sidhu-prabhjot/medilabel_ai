@@ -112,6 +112,7 @@ async def add_new_workout(
             "workout_date": workout_record.workout_date.isoformat(),
             "duration_minutes": workout_record.duration_minutes,
             "notes": workout_record.notes,
+            "routine_id": workout_record.routine_id,
         })
         .execute()
     )

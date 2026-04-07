@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import AppLayout from "../src/components/layout/app-layout";
 import Card from "../src/components/card";
 import StatCard from "../src/components/stat-card";
@@ -18,6 +18,10 @@ import {
   getExercises,
   getRoutines,
   getPlans,
+  getPlanDays,
+  getPlanRestDays,
+  getRoutineExercises,
+  getRoutineSets,
   getWorkoutExercises,
   getSets,
 } from "../src/api/workouts.api";
@@ -51,6 +55,46 @@ function thisWeekWorkouts(workouts: Workout[]): number {
   startOfWeek.setDate(now.getDate() - ((now.getDay() + 6) % 7)); // Monday
   startOfWeek.setHours(0, 0, 0, 0);
   return workouts.filter((w) => new Date(w.workout_date) >= startOfWeek).length;
+}
+
+// ISO week key (YYYY-Www) — identifies which week a date falls in.
+function isoWeekKey(dateStr: string): string {
+  const d = new Date(dateStr);
+  const day = d.getDay() === 0 ? 7 : d.getDay();
+  const thursday = new Date(d);
+  thursday.setDate(d.getDate() + 4 - day);
+  const year = thursday.getFullYear();
+  const jan1 = new Date(year, 0, 1);
+  const week = Math.ceil(((thursday.getTime() - jan1.getTime()) / 86400000 + 1) / 7);
+  return `${year}-W${String(week).padStart(2, "0")}`;
+}
+
+// Counts consecutive weeks (ending with the current week) that contain at least one workout.
+function computeStreak(workouts: Workout[]): number {
+  const weekKeys = new Set(workouts.map((w) => isoWeekKey(w.workout_date)));
+  let streak = 0;
+  const now = new Date();
+  while (true) {
+    const key = isoWeekKey(
+      new Date(now.getTime() - streak * 7 * 24 * 60 * 60 * 1000)
+        .toISOString()
+        .slice(0, 10),
+    );
+    if (!weekKeys.has(key)) break;
+    streak++;
+  }
+  return streak;
+}
+
+// Returns the count of exercises for which the user has a recorded best weight.
+function computePRCount(enrichedWorkouts: EnrichedWorkout[]): number {
+  const exercisesWithWeight = new Set<number>();
+  for (const ew of enrichedWorkouts) {
+    for (const ee of ew.exercises) {
+      if (ee.sets.some((s) => s.weight_kg)) exercisesWithWeight.add(ee.exercise.id);
+    }
+  }
+  return exercisesWithWeight.size;
 }
 
 function weeklyVolumeKg(enrichedWorkouts: EnrichedWorkout[]): number {
@@ -93,18 +137,45 @@ export default function WorkoutsPage() {
   // Track PRs announced in the current session to show a banner
   const [sessionPRs, setSessionPRs] = useState<PersonalRecord[]>([]);
 
+  // Routines scheduled for today from the active weekly plan
+  const [todayRoutines, setTodayRoutines] = useState<WorkoutRoutine[]>([]);
+
   // Preset exercises when starting a workout from a routine
   const [routinePreset, setRoutinePreset] = useState<{
+    routineId: number;
     name: string;
     exercises: EnrichedRoutineExercise[];
   } | null>(null);
 
   function handleStartFromRoutine(
+    routineId: number,
     routineName: string,
     exercises: EnrichedRoutineExercise[],
   ) {
-    setRoutinePreset({ name: routineName, exercises });
+    setRoutinePreset({ routineId, name: routineName, exercises });
     setActiveSection("log");
+  }
+
+  // Fetches a routine's exercises+sets then launches the logger preset.
+  async function startRoutine(routine: WorkoutRoutine) {
+    const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
+    const res = await getRoutineExercises(routine.id);
+    const enriched = await Promise.all(
+      res.map(async (re) => {
+        const sets = await getRoutineSets(re.id);
+        return {
+          routineExercise: re,
+          exercise: exerciseMap.get(re.exercise_id) ?? {
+            id: re.exercise_id,
+            exercise_name: `Exercise #${re.exercise_id}`,
+            muscle_group: "Unknown",
+            equipment: null,
+          },
+          sets,
+        };
+      }),
+    );
+    handleStartFromRoutine(routine.id, routine.routine_name, enriched);
   }
 
   // ── Loaders ──────────────────────────────────────────────────────────────────
@@ -120,6 +191,31 @@ export default function WorkoutsPage() {
     setExercises(e);
     setRoutines(r);
     setPlans(p);
+
+    // Derive today's routines from the active plan.
+    // JS getDay(): 0=Sun..6=Sat → convert to Mon=0..Sun=6 to match the app's weekday convention.
+    const activePlan = p.find((plan) => plan.is_active);
+    if (activePlan) {
+      const todayWeekday = (new Date().getDay() + 6) % 7;
+      const [days, restDays] = await Promise.all([
+        getPlanDays(activePlan.id),
+        getPlanRestDays(activePlan.id),
+      ]);
+      const isRestDay = restDays.some((rd) => rd.weekday === todayWeekday);
+      if (isRestDay) {
+        setTodayRoutines([]);
+      } else {
+        const routineMap = new Map(r.map((rt) => [rt.id, rt]));
+        const scheduled = days
+          .filter((d) => d.weekday === todayWeekday)
+          .map((d) => routineMap.get(d.routine_id))
+          .filter((rt): rt is WorkoutRoutine => rt !== undefined);
+        setTodayRoutines(scheduled);
+      }
+    } else {
+      setTodayRoutines([]);
+    }
+
     return w;
   }, []);
 
@@ -193,16 +289,18 @@ export default function WorkoutsPage() {
 
   // ── Derived stats ─────────────────────────────────────────────────────────────
 
-  const thisWeek = thisWeekWorkouts(workouts);
-  const volume = weeklyVolumeKg(enrichedWorkouts);
+  const thisWeek = useMemo(() => thisWeekWorkouts(workouts), [workouts]);
+  const volume = useMemo(() => weeklyVolumeKg(enrichedWorkouts), [enrichedWorkouts]);
+  const streak = useMemo(() => computeStreak(workouts), [workouts]);
+  const prCount = useMemo(() => computePRCount(enrichedWorkouts), [enrichedWorkouts]);
 
   const stats = [
     {
-      label: "Total Workouts",
-      value: String(workouts.length),
-      change: "logged",
-      positive: true,
-      barColor: "bg-indigo-500",
+      label: "Current Streak",
+      value: streak > 0 ? `${streak} wk${streak > 1 ? "s" : ""}` : "—",
+      change: streak > 0 ? "consecutive weeks" : "no active streak",
+      positive: streak > 0,
+      barColor: "bg-amber-500",
     },
     {
       label: "This Week",
@@ -219,11 +317,11 @@ export default function WorkoutsPage() {
       barColor: "bg-purple-500",
     },
     {
-      label: "Routines",
-      value: String(routines.length),
-      change: "templates",
-      positive: true,
-      barColor: "bg-amber-500",
+      label: "Personal Records",
+      value: String(prCount),
+      change: "exercises with a best",
+      positive: prCount > 0,
+      barColor: "bg-indigo-500",
     },
   ];
 
@@ -342,10 +440,36 @@ export default function WorkoutsPage() {
                 </span>
               )}
             </div>
+
+            {/* Today's scheduled routines from the active plan */}
+            {todayRoutines.length > 0 && !routinePreset && (
+              <div className={`mb-5 rounded-xl border p-3 space-y-2 ${dark ? "bg-slate-700/30 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
+                <p className={`text-xs font-semibold uppercase tracking-wide ${dark ? "text-slate-400" : "text-slate-500"}`}>
+                  Today's Plan
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {todayRoutines.map((r) => (
+                    <button
+                      key={r.id}
+                      onClick={() => startRoutine(r)}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                        dark
+                          ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
+                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                      }`}
+                    >
+                      <Icon name="play_arrow" className="text-base" />
+                      {r.routine_name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             <WorkoutLogger
               exercises={exercises}
               previousWorkouts={enrichedWorkouts}
               initialPreset={routinePreset}
+              onCancel={() => setRoutinePreset(null)}
               onSaved={(prs) => {
                 setRoutinePreset(null);
                 if (prs.length > 0) setSessionPRs(prs);
@@ -393,7 +517,7 @@ export default function WorkoutsPage() {
               exercises={exercises}
               onRefresh={refreshRoutines}
               onExerciseCreated={(e) => setExercises((prev) => [...prev, e])}
-              onStartWorkout={() => console.log("onStartWorkout")}
+              onStartWorkout={handleStartFromRoutine}
             />
           </Card>
         )}
