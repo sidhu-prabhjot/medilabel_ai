@@ -1,5 +1,5 @@
 import api from "./axios";
-import { LoginResponse } from "../types/auth";
+import { LoginResponse, MeResponse } from "../types/auth";
 
 export const loginUser = async (
   email: string,
@@ -32,4 +32,9 @@ export const signupUser = async (
   } catch (error) {
     throw error;
   }
+};
+
+export const getMe = async (): Promise<MeResponse> => {
+  const response = await api.get<MeResponse>("/api/auth/me");
+  return response.data;
 };

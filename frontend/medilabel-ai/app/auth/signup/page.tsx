@@ -29,11 +29,14 @@ export default function SignUpPage() {
     setLoading(true);
 
     try {
-      const data = await signupUser(email, password);
-      localStorage.setItem("token", data.access_token);
+      await signupUser(email, password);
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Sign up failed. Please try again.");
+      const detail = err.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((e: any) => e.msg).join(", ")
+        : detail || "Sign up failed. Please try again.";
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -98,7 +101,11 @@ export default function SignUpPage() {
 
           {error && <p className="text-sm text-red-500">{error}</p>}
 
-          <Button type="submit" disabled={loading} className="disabled:opacity-50">
+          <Button
+            type="submit"
+            disabled={loading}
+            className="disabled:opacity-50"
+          >
             {loading ? "Creating account…" : "Create account"}
           </Button>
         </form>

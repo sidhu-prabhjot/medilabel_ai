@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import AppLayout from "../src/components/layout/app-layout";
 import Icon from "../src/components/icon";
 import { useTheme } from "../src/context/theme-context";
+import { getMe } from "../src/api/auth.api";
 
 // ─── Circular progress ring ───────────────────────────────────────────────────
 function CircleProgress({ pct, size = 64 }: { pct: number; size?: number }) {
@@ -178,17 +179,14 @@ export default function DashboardPage() {
   const [username, setUsername] = useState("User");
 
   useEffect(() => {
-    try {
-      const token = localStorage.getItem("token");
-      if (token) {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        const raw: string = payload.sub || payload.email || "";
-        const name = raw.includes("@") ? raw.split("@")[0] : raw;
-        if (name) setUsername(name.charAt(0).toUpperCase() + name.slice(1));
-      }
-    } catch {
-      // keep default
-    }
+    getMe()
+      .then(({ email }) => {
+        const name = email.split("@")[0];
+        setUsername(name.charAt(0).toUpperCase() + name.slice(1));
+      })
+      .catch(() => {
+        // keep default "User" if the request fails
+      });
   }, []);
 
   const heading = dark ? "text-white" : "text-gray-800";

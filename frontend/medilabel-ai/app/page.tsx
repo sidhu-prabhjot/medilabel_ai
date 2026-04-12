@@ -20,14 +20,15 @@ export default function Home() {
     setError("");
 
     try {
-      const data = await loginUser(email, password);
-      const token = data.access_token;
-
-      localStorage.setItem("token", token);
+      await loginUser(email, password);
 
       router.push("/dashboard");
     } catch (err: any) {
-      setError(err.response?.data?.detail || "Login failed");
+      const detail = err.response?.data?.detail;
+      const message = Array.isArray(detail)
+        ? detail.map((e: any) => e.msg).join(", ")
+        : detail || "Login failed";
+      setError(message);
     }
   };
 

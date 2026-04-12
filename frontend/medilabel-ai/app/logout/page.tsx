@@ -4,17 +4,18 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useTheme } from "../src/context/theme-context";
 import Icon from "../src/components/icon";
-
-// Clears the auth token from localStorage and redirects to the login page.
-// The sidebar logout link points here.
+import api from "../src/api/axios";
 
 export default function LogoutPage() {
   const router = useRouter();
   const { dark } = useTheme();
 
   useEffect(() => {
-    localStorage.removeItem("token");
-    router.push("/");
+    // Tell the backend to delete the refresh token from the DB and clear cookies.
+    // We redirect regardless — if the API call fails, the user is still sent to login.
+    api.post("/api/auth/logout").finally(() => {
+      router.push("/");
+    });
   }, [router]);
 
   return (

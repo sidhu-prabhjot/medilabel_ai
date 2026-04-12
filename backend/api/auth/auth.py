@@ -1,18 +1,15 @@
-from fastapi import Depends, HTTPException, status
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi import Cookie, HTTPException, status
 from uuid import UUID
 import jwt
-
 from api.auth.jwt import decode_access_token
 from api.db.supabase import supabase
 
-security = HTTPBearer()
+def get_current_user(access_token: str = Cookie(default=None)) -> UUID:
+    if not access_token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Not authenticated")
 
-def get_current_user(
-    credentials: HTTPAuthorizationCredentials = Depends(security),
-) -> UUID:
     try:
-        payload = decode_access_token(credentials.credentials)
+        payload = decode_access_token(access_token)
     except jwt.ExpiredSignatureError:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
