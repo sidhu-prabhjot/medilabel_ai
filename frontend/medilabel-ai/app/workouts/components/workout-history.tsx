@@ -22,11 +22,18 @@ interface Props {
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString(undefined, {
-    weekday: "short",
     month: "short",
     day: "numeric",
     year: "numeric",
   });
+}
+
+function durationLabel(minutes: number | null | undefined): string {
+  if (!minutes) return "—";
+  if (minutes < 60) return `${minutes}m`;
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 
 function volumeLabel(ew: EnrichedWorkout): string {
@@ -39,19 +46,27 @@ function volumeLabel(ew: EnrichedWorkout): string {
   return total > 0 ? `${total.toLocaleString()} kg` : "—";
 }
 
+const RANGE_LABELS: { value: "all" | "month" | "week"; label: string }[] = [
+  { value: "all", label: "All Time" },
+  { value: "month", label: "30 Days" },
+  { value: "week", label: "This Week" },
+];
+
+const PAGE_SIZE = 10;
+
 export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
-  const muted = dark ? "text-slate-400" : "text-slate-500";
-  const divider = dark ? "border-slate-700" : "border-slate-100";
 
-  // Map of workout id → enriched detail (loaded on expand)
+  const heading = dark ? "text-white" : "text-[#4F6F52]";
+  const muted   = dark ? "text-neutral-400" : "text-[#A3B18A]";
+
   const [detailMap, setDetailMap] = useState<Map<number, EnrichedWorkout>>(new Map());
-  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [loadingId, setLoadingId]   = useState<number | null>(null);
   const [expandedId, setExpandedId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [search, setSearch] = useState("");
-  const [range, setRange] = useState<"all" | "month" | "week">("all");
+  const [search, setSearch]         = useState("");
+  const [range, setRange]           = useState<"all" | "month" | "week">("all");
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const exerciseMap = new Map(exercises.map((e) => [e.id, e]));
 
@@ -60,11 +75,9 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
       setExpandedId((prev) => (prev === workout.id ? null : workout.id));
       return;
     }
-
     setLoadingId(workout.id);
     try {
       const workoutExercises = await getWorkoutExercises(workout.id);
-
       const enrichedExercises = await Promise.all(
         workoutExercises.map(async (we) => {
           const sets = await getSets(we.id);
@@ -77,14 +90,12 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
           return { workoutExercise: we, exercise, sets };
         }),
       );
-
       const enriched: EnrichedWorkout = {
         workout,
         exercises: enrichedExercises.sort(
           (a, b) => (a.workoutExercise.order_index ?? 0) - (b.workoutExercise.order_index ?? 0),
         ),
       };
-
       setDetailMap((prev) => new Map(prev).set(workout.id, enriched));
       setExpandedId(workout.id);
     } finally {
@@ -96,24 +107,11 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
     setDeletingId(workoutId);
     try {
       await deleteWorkout(workoutId);
-      setDetailMap((prev) => {
-        const next = new Map(prev);
-        next.delete(workoutId);
-        return next;
-      });
+      setDetailMap((prev) => { const next = new Map(prev); next.delete(workoutId); return next; });
       onRefresh();
     } finally {
       setDeletingId(null);
     }
-  }
-
-  if (workouts.length === 0) {
-    return (
-      <div className={`flex flex-col items-center gap-2 py-10 ${muted}`}>
-        <Icon name="fitness_center" className="text-4xl opacity-40" />
-        <p className="text-sm">No workouts logged yet. Use the logger above to add your first one.</p>
-      </div>
-    );
   }
 
   const sorted = useMemo(() => {
@@ -125,7 +123,6 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
     };
     const cutoff = cutoffs[range];
     const q = search.toLowerCase();
-
     return [...workouts]
       .sort((a, b) => new Date(b.workout_date).getTime() - new Date(a.workout_date).getTime())
       .filter((w) => {
@@ -135,188 +132,240 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
       });
   }, [workouts, search, range]);
 
-  const rangeLabels: { value: "all" | "month" | "week"; label: string }[] = [
-    { value: "all", label: "All Time" },
-    { value: "month", label: "30 Days" },
-    { value: "week", label: "This Week" },
-  ];
+  if (workouts.length === 0) {
+    return (
+      <div className={`flex flex-col items-center gap-3 py-16 ${muted}`}>
+        <Icon name="fitness_center" className="text-5xl opacity-30" />
+        <p className="text-sm font-medium">No workouts logged yet.</p>
+      </div>
+    );
+  }
 
   return (
-    <div>
-      {/* Search + date range filter */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
-        <div className="relative flex-1 min-w-[160px]">
-          <Icon name="search" className={`absolute left-2.5 top-1/2 -translate-y-1/2 text-sm pointer-events-none ${muted}`} />
+    <div className="space-y-8">
+      {/* Search + filter */}
+      <section className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="relative flex-grow max-w-md">
+          <Icon
+            name="search"
+            className={`absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none ${muted}`}
+          />
           <input
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => { setSearch(e.target.value); setVisibleCount(PAGE_SIZE); }}
             placeholder="Search workouts…"
-            className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-sm transition-colors ${
+            className={`w-full border-none rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:ring-2 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] transition-shadow ${
               dark
-                ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-                : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+                ? "bg-neutral-900 text-white placeholder-neutral-500 focus:ring-green-700"
+                : "bg-white text-[#4F6F52] placeholder-[#A3B18A] focus:ring-[#4F6F52]/20"
             }`}
           />
         </div>
-        <div className="flex items-center gap-1">
-          {rangeLabels.map((r) => (
+
+        <div
+          className={`flex items-center p-1.5 rounded-full shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] border ${
+            dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#DAD7CD]/30"
+          }`}
+        >
+          {RANGE_LABELS.map((r) => (
             <button
               key={r.value}
-              onClick={() => setRange(r.value)}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+              onClick={() => { setRange(r.value); setVisibleCount(PAGE_SIZE); }}
+              className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
                 range === r.value
-                  ? "bg-indigo-600 text-white"
+                  ? dark
+                    ? "bg-green-700 text-white"
+                    : "bg-[#4F6F52] text-[#F5F3EE]"
                   : dark
-                    ? "bg-slate-700 text-slate-400 hover:text-slate-200"
-                    : "bg-slate-100 text-slate-500 hover:text-slate-700"
+                    ? "text-neutral-400 hover:text-neutral-200"
+                    : "text-[#A3B18A] hover:bg-[#4F6F52]/5"
               }`}
             >
               {r.label}
             </button>
           ))}
         </div>
+      </section>
+
+      {/* Table column header (desktop) */}
+      <div className={`hidden md:grid grid-cols-12 px-8 py-2 text-[11px] font-bold uppercase tracking-[0.2em] ${muted}`}>
+        <div className="col-span-5">Workout Name</div>
+        <div className="col-span-2">Date</div>
+        <div className="col-span-2 text-center">Duration</div>
+        <div className="col-span-2 text-center">Volume</div>
+        <div className="col-span-1" />
       </div>
 
-      {/* Table header */}
-      <div className={`hidden md:grid grid-cols-12 gap-2 pb-2 border-b text-xs font-medium uppercase tracking-wide ${muted} ${divider}`}>
-        <span className="col-span-4">Workout</span>
-        <span className="col-span-3">Date</span>
-        <span className="col-span-2 text-right">Duration</span>
-        <span className="col-span-2 text-right">Volume</span>
-        <span className="col-span-1" />
-      </div>
+      {/* Rows */}
+      {sorted.length === 0 ? (
+        <div className={`flex flex-col items-center gap-3 py-16 ${muted}`}>
+          <Icon name="search_off" className="text-5xl opacity-30" />
+          <p className="text-sm font-medium">No workouts match your search.</p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {sorted.slice(0, visibleCount).map((w) => {
+            const detail    = detailMap.get(w.id);
+            const isExpanded = expandedId === w.id;
+            const isLoading  = loadingId === w.id;
 
-      {sorted.length === 0 && (
-        <p className={`text-sm text-center py-8 ${muted}`}>No workouts match your search.</p>
+            return (
+              <div
+                key={w.id}
+                className={`rounded-3xl border overflow-hidden transition-all duration-200 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
+                  isExpanded
+                    ? dark
+                      ? "border-green-800/40 border-2 bg-neutral-900"
+                      : "border-[#4F6F52]/20 border-2 bg-white shadow-md"
+                    : dark
+                      ? "border-neutral-800 bg-neutral-900"
+                      : "border-[#DAD7CD]/50 bg-white"
+                }`}
+              >
+                {/* Row header */}
+                <div className="grid grid-cols-4 md:grid-cols-12 items-center px-6 md:px-8 py-5 gap-4">
+                  {/* Name */}
+                  <div className="col-span-3 md:col-span-5">
+                    <h3 className={`text-base font-bold ${heading}`}>{w.workout_name}</h3>
+                    <p className={`text-xs font-medium md:hidden uppercase tracking-wider mt-0.5 ${muted}`}>
+                      {formatDate(w.workout_date)}{w.duration_minutes ? ` • ${durationLabel(w.duration_minutes)}` : ""}
+                    </p>
+                  </div>
+
+                  {/* Date */}
+                  <div className={`hidden md:block col-span-2 text-sm font-medium ${dark ? "text-white/70" : "text-[#4F6F52]/80"}`}>
+                    {formatDate(w.workout_date)}
+                  </div>
+
+                  {/* Duration */}
+                  <div className={`hidden md:block col-span-2 text-center text-sm font-medium tabular-nums ${dark ? "text-white/70" : "text-[#4F6F52]/80"}`}>
+                    {durationLabel(w.duration_minutes)}
+                  </div>
+
+                  {/* Volume */}
+                  <div className={`hidden md:block col-span-2 text-center text-sm font-medium font-mono tabular-nums ${dark ? "text-white/70" : "text-[#4F6F52]/80"}`}>
+                    {detail ? volumeLabel(detail) : "—"}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="col-span-1 flex justify-end items-center gap-1">
+                    <button
+                      onClick={() => handleDelete(w.id)}
+                      disabled={deletingId === w.id}
+                      title="Delete workout"
+                      className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-30 ${
+                        dark
+                          ? "text-neutral-600 hover:text-red-400 hover:bg-red-500/10"
+                          : "text-[#DAD7CD] hover:text-red-500 hover:bg-red-50"
+                      }`}
+                    >
+                      <Icon name="delete" className="text-sm" />
+                    </button>
+                    <button
+                      onClick={() => loadDetail(w)}
+                      className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
+                        isExpanded
+                          ? dark
+                            ? "bg-green-900/40 text-green-400"
+                            : "bg-[#4F6F52]/10 text-[#4F6F52]"
+                          : dark
+                            ? "text-neutral-400 hover:bg-neutral-800"
+                            : "text-[#4F6F52] hover:bg-[#4F6F52]/5"
+                      }`}
+                    >
+                      <Icon
+                        name={isLoading ? "progress_activity" : isExpanded ? "expand_less" : "expand_more"}
+                        className="text-base"
+                      />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Expanded exercise details */}
+                {isExpanded && detail && (
+                  <div
+                    className={`px-8 py-6 space-y-6 border-t ${
+                      dark
+                        ? "bg-neutral-950/60 border-neutral-800"
+                        : "bg-[#F5F3EE]/40 border-[#DAD7CD]/30"
+                    }`}
+                  >
+                    {w.notes && (
+                      <p className={`text-sm italic ${muted}`}>{w.notes}</p>
+                    )}
+
+                    {detail.exercises.length === 0 ? (
+                      <p className={`text-sm ${muted}`}>No exercises recorded.</p>
+                    ) : (
+                      detail.exercises.map((ee) => (
+                        <div key={ee.workoutExercise.id}>
+                          <div className="flex justify-between items-center mb-3">
+                            <span className={`text-sm font-bold uppercase tracking-wider ${heading}`}>
+                              {ee.exercise.exercise_name}
+                            </span>
+                            <span className={`text-xs font-bold ${muted}`}>
+                              {ee.sets.length} Set{ee.sets.length !== 1 ? "s" : ""}
+                            </span>
+                          </div>
+
+                          {ee.sets.length === 0 ? (
+                            <p className={`text-xs ${muted}`}>No sets recorded.</p>
+                          ) : (
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                              {ee.sets.map((s, i) => (
+                                <div
+                                  key={s.id}
+                                  className={`p-3 rounded-xl border text-center ${
+                                    dark
+                                      ? "bg-neutral-900 border-neutral-800"
+                                      : "bg-white border-[#DAD7CD]/30"
+                                  }`}
+                                >
+                                  <p className={`text-[10px] uppercase tracking-tighter mb-1 ${muted}`}>
+                                    Set {i + 1}
+                                  </p>
+                                  <p className={`font-bold text-sm ${heading}`}>
+                                    {s.weight_kg != null ? `${s.weight_kg}` : "—"}
+                                    {" × "}
+                                    {s.reps ?? "—"}
+                                  </p>
+                                  {(s.rpe || s.rest_seconds) && (
+                                    <p className={`text-[10px] mt-0.5 ${muted}`}>
+                                      {s.rpe ? `RPE ${s.rpe}` : ""}
+                                      {s.rpe && s.rest_seconds ? " · " : ""}
+                                      {s.rest_seconds ? `${s.rest_seconds}s` : ""}
+                                    </p>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
       )}
 
-      <div className="divide-y" style={{ borderColor: dark ? "#334155" : "#f1f5f9" }}>
-        {sorted.map((w) => {
-          const detail = detailMap.get(w.id);
-          const isExpanded = expandedId === w.id;
-          const isLoading = loadingId === w.id;
-
-          return (
-            <div key={w.id}>
-              {/* Row */}
-              <div className="grid grid-cols-12 gap-2 items-center py-3">
-                {/* Name */}
-                <div className="col-span-4 flex items-center gap-2">
-                  <button
-                    onClick={() => loadDetail(w)}
-                    className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                      dark ? "text-indigo-400 hover:text-indigo-300" : "text-indigo-600 hover:text-indigo-700"
-                    }`}
-                  >
-                    <Icon
-                      name={isLoading ? "progress_activity" : isExpanded ? "expand_less" : "chevron_right"}
-                      className="text-base"
-                    />
-                    <span className={heading}>{w.workout_name}</span>
-                  </button>
-                </div>
-
-                {/* Date */}
-                <span className={`col-span-3 text-sm ${muted}`}>{formatDate(w.workout_date)}</span>
-
-                {/* Duration */}
-                <span className={`col-span-2 text-sm text-right tabular-nums ${muted}`}>
-                  {w.duration_minutes ? `${w.duration_minutes} min` : "—"}
-                </span>
-
-                {/* Volume */}
-                <span className={`col-span-2 text-sm text-right tabular-nums ${muted}`}>
-                  {detail ? volumeLabel(detail) : "—"}
-                </span>
-
-                {/* Delete */}
-                <div className="col-span-1 flex justify-end">
-                  <button
-                    onClick={() => handleDelete(w.id)}
-                    disabled={deletingId === w.id}
-                    title="Delete workout"
-                    className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${
-                      dark
-                        ? "hover:bg-red-500/15 text-slate-500 hover:text-red-400"
-                        : "hover:bg-red-50 text-slate-400 hover:text-red-500"
-                    }`}
-                  >
-                    <Icon name="delete" className="text-base" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Expanded exercise detail */}
-              {isExpanded && detail && (
-                <div
-                  className={`mb-3 mx-0 rounded-xl p-4 space-y-4 ${
-                    dark ? "bg-slate-700/30 border border-slate-700" : "bg-slate-50 border border-slate-200"
-                  }`}
-                >
-                  {w.notes && (
-                    <p className={`text-xs italic ${muted}`}>{w.notes}</p>
-                  )}
-
-                  {detail.exercises.length === 0 ? (
-                    <p className={`text-sm ${muted}`}>No exercises recorded.</p>
-                  ) : (
-                    detail.exercises.map((ee) => (
-                      <div key={ee.workoutExercise.id}>
-                        <div className="flex items-baseline gap-2 mb-2">
-                          <span className={`text-sm font-semibold ${heading}`}>
-                            {ee.exercise.exercise_name}
-                          </span>
-                          <span className={`text-xs ${muted}`}>
-                            {ee.exercise.muscle_group}
-                            {ee.exercise.equipment ? ` · ${ee.exercise.equipment}` : ""}
-                          </span>
-                        </div>
-
-                        {ee.sets.length === 0 ? (
-                          <p className={`text-xs ${muted}`}>No sets recorded.</p>
-                        ) : (
-                          <table className="w-full text-xs">
-                            <thead>
-                              <tr className={`text-left border-b ${divider}`}>
-                                <th className={`pb-1 font-medium ${muted}`}>Set</th>
-                                <th className={`pb-1 font-medium ${muted}`}>Reps</th>
-                                <th className={`pb-1 font-medium ${muted}`}>Weight</th>
-                                <th className={`pb-1 font-medium ${muted}`}>RPE</th>
-                                <th className={`pb-1 font-medium ${muted}`}>Rest</th>
-                                <th className={`pb-1 font-medium text-right ${muted}`}>Volume</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {ee.sets.map((s, i) => (
-                                <tr key={s.id} className={`border-b ${divider}`}>
-                                  <td className={`py-1.5 tabular-nums ${muted}`}>{i + 1}</td>
-                                  <td className={`py-1.5 tabular-nums ${heading}`}>{s.reps ?? "—"}</td>
-                                  <td className={`py-1.5 tabular-nums ${heading}`}>
-                                    {s.weight_kg ? `${s.weight_kg} kg` : "—"}
-                                  </td>
-                                  <td className={`py-1.5 tabular-nums ${muted}`}>{s.rpe ?? "—"}</td>
-                                  <td className={`py-1.5 tabular-nums ${muted}`}>
-                                    {s.rest_seconds ? `${s.rest_seconds}s` : "—"}
-                                  </td>
-                                  <td className={`py-1.5 tabular-nums text-right ${muted}`}>
-                                    {s.reps && s.weight_kg
-                                      ? `${(s.reps * s.weight_kg).toLocaleString()} kg`
-                                      : "—"}
-                                  </td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        )}
-                      </div>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
+      {/* Load more */}
+      {sorted.length > visibleCount && (
+        <div className="flex justify-center pt-4">
+          <button
+            onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
+            className={`px-8 py-3 rounded-full border font-bold text-sm uppercase tracking-widest transition-all duration-300 ${
+              dark
+                ? "border-green-700 text-green-400 hover:bg-green-700 hover:text-white"
+                : "border-[#4F6F52] text-[#4F6F52] hover:bg-[#4F6F52] hover:text-white"
+            }`}
+          >
+            Load Older History
+          </button>
+        </div>
+      )}
     </div>
   );
 }

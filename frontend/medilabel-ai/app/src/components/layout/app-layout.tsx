@@ -17,7 +17,7 @@ export default function AppLayout({
 
   return (
     <div
-      className={`flex min-h-screen ${dark ? "bg-slate-900" : "bg-slate-50"} transition-colors duration-200`}
+      className={`flex min-h-screen ${dark ? "bg-neutral-950" : "bg-[#F5F3EE]"} transition-colors duration-200`}
     >
       <Sidebar />
       <div className="flex-1 flex flex-col min-w-0">

@@ -38,3 +38,7 @@ node_modules/
 backend/requirements_new.txt
 
 CLAUDE.md
+
+design.md
+
+.claude/

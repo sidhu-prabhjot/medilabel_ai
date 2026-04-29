@@ -66,7 +66,7 @@ export interface UserMedication {
 // ── Symptom log ────────────────────────────────────────────────────────────────
 
 export interface SymptomLog {
-  symptom_id: string;
+  symptom_id: number;
   user_id: string;
   symptom: string;
   severity: number;

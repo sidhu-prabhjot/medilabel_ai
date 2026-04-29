@@ -5,7 +5,7 @@ from typing import Optional
 
 
 class SymptomLogResponse(BaseModel):
-    symptom_id: str
+    symptom_id: int
     user_id: str
     symptom: str
     severity: int

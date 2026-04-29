@@ -1,66 +1,53 @@
-import Card from "./card";
-import Icon from "./icon";
 import { useTheme } from "../context/theme-context";
 
 export default function StatCard({
   label,
   value,
-  change,
-  positive,
-  barColor,
+  unit,
 }: {
   label: string;
   value: string;
-  change: string;
-  positive: boolean;
-  barColor: string;
+  unit?: string;
+  // legacy props — kept for compatibility, unused
+  change?: string;
+  positive?: boolean;
+  barColor?: string;
 }) {
   const { dark } = useTheme();
 
   return (
-    <Card className="flex flex-col gap-3">
-      <div className="flex items-center justify-between">
-        <span
-          className={`text-xs font-medium uppercase tracking-wide ${
-            dark ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          {label}
-        </span>
-
-        <span
-          className={`inline-flex items-center gap-1 text-xs font-semibold px-2 py-0.5 rounded-full ${
-            positive
-              ? dark
-                ? "bg-emerald-500/15 text-emerald-400"
-                : "bg-emerald-50 text-emerald-700"
-              : dark
-                ? "bg-red-500/15 text-red-400"
-                : "bg-red-50 text-red-700"
-          }`}
-        >
-          <Icon
-            name={positive ? "arrow_upward" : "arrow_downward"}
-            className="w-6 h-6"
-          />
-          {change}
-        </span>
-      </div>
-
+    <div
+      className={`rounded-xl border p-6 transition-colors duration-200 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
+        dark
+          ? "bg-neutral-900 border-neutral-800"
+          : "bg-white border-[#DAD7CD]/30"
+      }`}
+    >
       <p
-        className={`text-2xl font-bold tabular-nums ${dark ? "text-white" : "text-slate-900"}`}
+        className={`text-[10px] font-bold tracking-[0.2em] uppercase mb-2 ${
+          dark ? "text-neutral-500" : "text-[#A3B18A]"
+        }`}
       >
-        {value}
+        {label}
       </p>
-
-      <div
-        className={`h-1 w-full rounded-full ${dark ? "bg-slate-700" : "bg-slate-100"}`}
-      >
-        <div
-          className={`h-1 rounded-full ${barColor}`}
-          style={{ width: "65%" }}
-        />
+      <div className="flex items-baseline gap-1.5">
+        <span
+          className={`text-3xl font-extrabold tabular-nums leading-none ${
+            dark ? "text-white" : "text-[#4F6F52]"
+          }`}
+        >
+          {value}
+        </span>
+        {unit && (
+          <span
+            className={`text-sm font-medium ${
+              dark ? "text-neutral-500" : "text-[#A3B18A]"
+            }`}
+          >
+            {unit.toUpperCase()}
+          </span>
+        )}
       </div>
-    </Card>
+    </div>
   );
 }

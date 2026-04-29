@@ -68,7 +68,11 @@ export default function Sidebar() {
           href="/health_products"
         />
         <SidebarItem icon="exercise" label="Workouts" href="/workouts" />
-        <SidebarItem icon="monitor_weight" label="Body Metrics" href="/body_metrics" />
+        <SidebarItem
+          icon="monitor_weight"
+          label="Body Metrics"
+          href="/body_metrics"
+        />
         <SidebarItem icon="symptoms" label="Symptoms" href="/symptoms" />
         <SidebarItem icon="settings" label="Settings" href="/settings" />
       </nav>

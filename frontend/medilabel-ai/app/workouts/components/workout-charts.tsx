@@ -23,8 +23,6 @@ interface Props {
   loading: boolean;
 }
 
-// ── ISO week key helper (YYYY-Www) ─────────────────────────────────────────────
-
 function isoWeekKey(dateStr: string): string {
   const d = new Date(dateStr);
   const day = d.getDay() === 0 ? 7 : d.getDay();
@@ -36,10 +34,7 @@ function isoWeekKey(dateStr: string): string {
   return `W${String(week).padStart(2, "0")}`;
 }
 
-// ── PR computation ─────────────────────────────────────────────────────────────
-
 function computePRs(enrichedWorkouts: EnrichedWorkout[]): PersonalRecord[] {
-  // exerciseId → { maxWeightKg, repsAtMax, achievedAt }
   const best = new Map<
     number,
     { exercise: Exercise; maxWeightKg: number; repsAtMax: number; achievedAt: string }
@@ -73,8 +68,6 @@ function computePRs(enrichedWorkouts: EnrichedWorkout[]): PersonalRecord[] {
   );
 }
 
-// ── Progress data per exercise ─────────────────────────────────────────────────
-
 function progressForExercise(
   enrichedWorkouts: EnrichedWorkout[],
   exerciseId: number,
@@ -98,7 +91,7 @@ function progressForExercise(
       }
       if (max > 0 || vol > 0) {
         points.push({
-          date: ew.workout.workout_date.slice(5), // MM-DD
+          date: ew.workout.workout_date.slice(5),
           maxWeightKg: max,
           totalVolume: vol,
         });
@@ -111,23 +104,25 @@ function progressForExercise(
 
 export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
-  const muted = dark ? "text-slate-400" : "text-slate-500";
+  const heading = dark ? "text-white" : "text-[#4F6F52]";
+  const muted   = dark ? "text-neutral-400" : "text-[#A3B18A]";
+
+  const tickColor  = dark ? "#737373" : "#A3B18A";
+  const gridColor  = dark ? "#262626" : "#DAD7CD";
+
   const tooltipStyle = {
-    backgroundColor: dark ? "#1e293b" : "#fff",
-    border: `1px solid ${dark ? "#334155" : "#e2e8f0"}`,
+    backgroundColor: dark ? "#171717" : "#fff",
+    border: `1px solid ${dark ? "#262626" : "#DAD7CD"}`,
     borderRadius: 8,
-    color: dark ? "#f1f5f9" : "#0f172a",
+    color: dark ? "#f5f5f5" : "#4F6F52",
     fontSize: 12,
   };
 
   const [selectedExerciseId, setSelectedExerciseId] = useState<number | "">("");
 
-  // ── Derived chart data ─────────────────────────────────────────────────────────
-
   const { weeklyFreq, weeklyVolume, prs, progressData } = useMemo(() => {
     const freqMap = new Map<string, number>();
-    const volMap = new Map<string, number>();
+    const volMap  = new Map<string, number>();
 
     for (const ew of enrichedWorkouts) {
       const key = isoWeekKey(ew.workout.workout_date);
@@ -143,13 +138,13 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
 
     const allWeeks = [...new Set([...freqMap.keys(), ...volMap.keys()])].sort().slice(-8);
 
-    const weeklyFreq = allWeeks.map((w) => ({ week: w, count: freqMap.get(w) ?? 0 }));
+    const weeklyFreq   = allWeeks.map((w) => ({ week: w, count: freqMap.get(w) ?? 0 }));
     const weeklyVolume = allWeeks.map((w) => ({
       week: w,
       volume: Math.round(volMap.get(w) ?? 0),
     }));
 
-    const prs = computePRs(enrichedWorkouts);
+    const prs          = computePRs(enrichedWorkouts);
     const progressData =
       selectedExerciseId !== ""
         ? progressForExercise(enrichedWorkouts, selectedExerciseId as number)
@@ -158,7 +153,6 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
     return { weeklyFreq, weeklyVolume, prs, progressData };
   }, [enrichedWorkouts, selectedExerciseId]);
 
-  // Exercises that have at least one set with weight data (for the picker)
   const trackedExercises = useMemo(() => {
     const ids = new Set<number>();
     for (const ew of enrichedWorkouts) {
@@ -192,25 +186,29 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
       {/* Weekly frequency + volume */}
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
-          <h3 className={`text-sm font-semibold mb-4 ${heading}`}>Workouts per Week</h3>
+          <h3 className={`text-[11px] font-bold tracking-[0.2em] uppercase mb-5 ${muted}`}>
+            Workouts per Week
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weeklyFreq} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} allowDecimals={false} />
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} allowDecimals={false} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v) => [v, "Workouts"]} />
-              <Bar dataKey="count" fill="#6366f1" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="count" fill="#4F6F52" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
 
         <Card>
-          <h3 className={`text-sm font-semibold mb-4 ${heading}`}>Weekly Volume (kg)</h3>
+          <h3 className={`text-[11px] font-bold tracking-[0.2em] uppercase mb-5 ${muted}`}>
+            Weekly Volume (kg)
+          </h3>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={weeklyVolume} margin={{ top: 4, right: 4, left: -10, bottom: 0 }}>
-              <XAxis dataKey="week" tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} />
+              <XAxis dataKey="week" tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v) => [`${v} kg`, "Volume"]} />
-              <Bar dataKey="volume" fill="#a78bfa" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="volume" fill="#d97706" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </Card>
@@ -218,17 +216,19 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
 
       {/* Exercise progress */}
       <Card>
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <h3 className={`text-sm font-semibold ${heading}`}>Exercise Progress</h3>
+        <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+          <h3 className={`text-[11px] font-bold tracking-[0.2em] uppercase ${muted}`}>
+            Exercise Progress
+          </h3>
           <select
             value={selectedExerciseId}
             onChange={(e) =>
               setSelectedExerciseId(e.target.value === "" ? "" : Number(e.target.value))
             }
-            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${
+            className={`text-sm px-3 py-2 rounded-lg border-none outline-none focus:ring-2 transition-colors ${
               dark
-                ? "bg-slate-700 border-slate-600 text-white"
-                : "bg-white border-slate-300 text-slate-900"
+                ? "bg-neutral-800 text-white focus:ring-green-700"
+                : "bg-[#F5F3EE] text-[#4F6F52] focus:ring-[#4F6F52]/20"
             }`}
           >
             <option value="">Select exercise…</option>
@@ -251,9 +251,9 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
         ) : (
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={progressData} margin={{ top: 4, right: 16, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke={dark ? "#334155" : "#f1f5f9"} />
-              <XAxis dataKey="date" tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} />
-              <YAxis tick={{ fontSize: 11, fill: dark ? "#94a3b8" : "#64748b" }} axisLine={false} tickLine={false} />
+              <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
+              <XAxis dataKey="date" tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11, fill: tickColor }} axisLine={false} tickLine={false} />
               <Tooltip
                 contentStyle={tooltipStyle}
                 formatter={(v, name) => [
@@ -264,9 +264,9 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
               <Line
                 type="monotone"
                 dataKey="maxWeightKg"
-                stroke="#6366f1"
+                stroke="#4F6F52"
                 strokeWidth={2}
-                dot={{ fill: "#6366f1", r: 4 }}
+                dot={{ fill: "#4F6F52", r: 4 }}
                 activeDot={{ r: 6 }}
                 name="maxWeightKg"
               />
@@ -277,30 +277,42 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
 
       {/* Personal records */}
       <Card>
-        <h3 className={`text-sm font-semibold mb-4 ${heading}`}>Personal Records</h3>
+        <h3 className={`text-[11px] font-bold tracking-[0.2em] uppercase mb-5 ${muted}`}>
+          Personal Records
+        </h3>
         {prs.length === 0 ? (
           <p className={`text-sm ${muted}`}>No weight data recorded yet.</p>
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className={`border-b text-left ${dark ? "border-slate-700" : "border-slate-200"}`}>
-                <th className={`py-2 font-medium text-xs uppercase tracking-wide ${muted}`}>Exercise</th>
-                <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Muscle</th>
-                <th className={`font-medium text-xs uppercase tracking-wide text-right ${muted}`}>Best Weight</th>
-                <th className={`font-medium text-xs uppercase tracking-wide text-right ${muted}`}>Reps</th>
-                <th className={`font-medium text-xs uppercase tracking-wide text-right ${muted}`}>Achieved</th>
+              <tr
+                className={`border-b text-left ${
+                  dark ? "border-neutral-800" : "border-[#DAD7CD]/40"
+                }`}
+              >
+                <th className={`py-2 font-bold text-[10px] uppercase tracking-[0.2em] ${muted}`}>Exercise</th>
+                <th className={`font-bold text-[10px] uppercase tracking-[0.2em] ${muted}`}>Muscle</th>
+                <th className={`font-bold text-[10px] uppercase tracking-[0.2em] text-right ${muted}`}>Best Weight</th>
+                <th className={`font-bold text-[10px] uppercase tracking-[0.2em] text-right ${muted}`}>Reps</th>
+                <th className={`font-bold text-[10px] uppercase tracking-[0.2em] text-right ${muted}`}>Achieved</th>
               </tr>
             </thead>
             <tbody>
               {prs.map((pr) => (
                 <tr
                   key={pr.exercise.id}
-                  className={`border-b transition-colors ${dark ? "border-slate-700" : "border-slate-100"}`}
+                  className={`border-b transition-colors ${
+                    dark ? "border-neutral-800" : "border-[#DAD7CD]/20"
+                  }`}
                 >
-                  <td className={`py-2.5 font-medium ${heading}`}>{pr.exercise.exercise_name}</td>
+                  <td className={`py-3 font-semibold ${heading}`}>{pr.exercise.exercise_name}</td>
                   <td className={`text-xs ${muted}`}>{pr.exercise.muscle_group}</td>
                   <td className="text-right tabular-nums">
-                    <span className={`text-sm font-semibold ${dark ? "text-indigo-300" : "text-indigo-600"}`}>
+                    <span
+                      className={`text-sm font-bold ${
+                        dark ? "text-green-400" : "text-[#4F6F52]"
+                      }`}
+                    >
                       {pr.maxWeightKg} kg
                     </span>
                   </td>

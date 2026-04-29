@@ -297,31 +297,27 @@ export default function WorkoutsPage() {
   const stats = [
     {
       label: "Current Streak",
-      value: streak > 0 ? `${streak} wk${streak > 1 ? "s" : ""}` : "—",
-      change: streak > 0 ? "consecutive weeks" : "no active streak",
-      positive: streak > 0,
-      barColor: "bg-amber-500",
+      value: streak > 0 ? String(streak) : "—",
+      unit: "Weeks",
+      barColor: "bg-green-700",
     },
     {
       label: "This Week",
       value: String(thisWeek),
-      change: thisWeek > 0 ? "sessions" : "none yet",
-      positive: thisWeek > 0,
-      barColor: thisWeek > 0 ? "bg-emerald-500" : "bg-slate-400",
+      unit: "Sessions",
+      barColor: thisWeek > 0 ? "bg-green-600" : "bg-stone-400",
     },
     {
       label: "Weekly Volume",
-      value: volume > 0 ? `${volume.toLocaleString()} kg` : "—",
-      change: "this week",
-      positive: volume > 0,
-      barColor: "bg-purple-500",
+      value: volume > 0 ? volume.toLocaleString() : "—",
+      unit: "KG",
+      barColor: "bg-amber-600",
     },
     {
       label: "Personal Records",
       value: String(prCount),
-      change: "exercises with a best",
-      positive: prCount > 0,
-      barColor: "bg-indigo-500",
+      unit: "Count",
+      barColor: "bg-green-800",
     },
   ];
 
@@ -337,14 +333,14 @@ export default function WorkoutsPage() {
                 key={i}
                 className={`rounded-xl border p-5 h-28 animate-pulse ${
                   dark
-                    ? "bg-slate-800 border-slate-700"
-                    : "bg-white border-slate-200"
+                    ? "bg-neutral-900 border-neutral-800"
+                    : "bg-white border-[#DAD7CD]/30"
                 }`}
               />
             ))}
           </div>
           <div
-            className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"}`}
+            className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#DAD7CD]/30"}`}
           />
         </div>
       </AppLayout>
@@ -359,30 +355,29 @@ export default function WorkoutsPage() {
         {/* Stats */}
         <section className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
           {stats.map((s, i) => (
-            <StatCard key={i} {...s} />
+            <StatCard key={i} label={s.label} value={s.value} unit={s.unit} barColor={s.barColor} />
           ))}
         </section>
 
         {/* Session PR banner */}
         {sessionPRs.length > 0 && (
           <div
-            className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-emerald-500/10 border-emerald-500/30" : "bg-emerald-50 border-emerald-200"}`}
+            className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-green-900/20 border-green-800/40" : "bg-[#4F6F52]/5 border-[#DAD7CD]"}`}
           >
             <Icon
               name="emoji_events"
-              className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-emerald-400" : "text-emerald-600"}`}
+              className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-green-400" : "text-green-700"}`}
             />
             <div className="flex-1">
               <p
-                className={`text-sm font-semibold mb-1 ${dark ? "text-emerald-300" : "text-emerald-800"}`}
+                className={`text-sm font-semibold mb-1 ${dark ? "text-green-300" : "text-green-800"}`}
               >
-                New Personal Record{sessionPRs.length > 1 ? "s" : ""} this
-                session!
+                New Personal Record{sessionPRs.length > 1 ? "s" : ""} this session!
               </p>
               {sessionPRs.map((pr) => (
                 <p
                   key={pr.exercise.id}
-                  className={`text-sm ${dark ? "text-emerald-200" : "text-emerald-900"}`}
+                  className={`text-sm ${dark ? "text-green-200" : "text-green-900"}`}
                 >
                   {pr.exercise.exercise_name} — {pr.maxWeightKg} kg
                   {pr.repsAtMax > 0 ? ` × ${pr.repsAtMax}` : ""}
@@ -391,34 +386,30 @@ export default function WorkoutsPage() {
             </div>
             <button
               onClick={() => setSessionPRs([])}
-              className={`p-1 rounded ${dark ? "text-emerald-500 hover:text-emerald-300" : "text-emerald-500 hover:text-emerald-700"}`}
+              className={`p-1 rounded ${dark ? "text-green-500 hover:text-green-300" : "text-green-600 hover:text-green-800"}`}
             >
               <Icon name="close" className="text-base" />
             </button>
           </div>
         )}
 
-        {/* Section nav */}
-        <div
-          className={`flex gap-1 p-1 rounded-xl ${dark ? "bg-slate-800" : "bg-slate-100"}`}
-        >
+        {/* Section nav — underline tabs */}
+        <div className={`flex border-b ${dark ? "border-neutral-800" : "border-[#DAD7CD]/40"}`}>
           {SECTIONS.map((s) => (
             <button
               key={s.id}
               onClick={() => setActiveSection(s.id)}
-              className={`flex items-center gap-1.5 flex-1 justify-center px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+              className={`px-4 py-3 text-xs font-bold uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
                 activeSection === s.id
                   ? dark
-                    ? "bg-slate-700 text-white shadow-sm"
-                    : "bg-white text-slate-900 shadow-sm"
+                    ? "border-green-500 text-green-400"
+                    : "border-[#E27D60] text-[#E27D60]"
                   : dark
-                    ? "text-slate-400 hover:text-slate-200"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "border-transparent text-neutral-500 hover:text-neutral-300"
+                    : "border-transparent text-[#A3B18A] hover:text-[#4F6F52]"
               }`}
             >
-              <Icon name={s.icon} className="text-base hidden sm:block" />
-              <span className="hidden sm:block">{s.label}</span>
-              <span className="sm:hidden">{s.label.split(" ")[0]}</span>
+              {s.label}
             </button>
           ))}
         </div>
@@ -428,13 +419,13 @@ export default function WorkoutsPage() {
           <Card>
             <div className="flex items-center justify-between mb-5">
               <h2
-                className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}
+                className={`text-xl font-bold tracking-tight ${dark ? "text-white" : "text-[#4F6F52]"}`}
               >
                 Log a Workout
               </h2>
               {exercises.length === 0 && (
                 <span
-                  className={`text-xs ${dark ? "text-amber-400" : "text-amber-600"}`}
+                  className={`text-xs font-medium ${dark ? "text-amber-400" : "text-[#A3B18A]"}`}
                 >
                   Add exercises to the library first
                 </span>
@@ -443,26 +434,46 @@ export default function WorkoutsPage() {
 
             {/* Today's scheduled routines from the active plan */}
             {todayRoutines.length > 0 && !routinePreset && (
-              <div className={`mb-5 rounded-xl border p-3 space-y-2 ${dark ? "bg-slate-700/30 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
-                <p className={`text-xs font-semibold uppercase tracking-wide ${dark ? "text-slate-400" : "text-slate-500"}`}>
-                  Today's Plan
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  {todayRoutines.map((r) => (
+              <div className="mb-5 space-y-3">
+                {todayRoutines.map((r) => (
+                  <div
+                    key={r.id}
+                    className={`relative overflow-hidden rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
+                      dark ? "bg-green-900/40" : "bg-[#4F6F52]"
+                    }`}
+                  >
+                    {/* Decorative circle */}
+                    <div className="absolute right-0 top-0 w-72 h-72 bg-white/5 rounded-full -mr-24 -mt-24 pointer-events-none" />
+
+                    <div className="relative z-10">
+                      <span
+                        className={`inline-block text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 ${
+                          dark ? "bg-green-800/60 text-green-300" : "bg-white/20 text-white"
+                        }`}
+                      >
+                        Today's Plan
+                      </span>
+                      <h3 className="text-white text-2xl font-bold tracking-tight mb-1">
+                        {r.routine_name}
+                      </h3>
+                      <p className="text-white/70 text-sm">
+                        Start your scheduled session for today.
+                      </p>
+                    </div>
+
                     <button
-                      key={r.id}
                       onClick={() => startRoutine(r)}
-                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                      className={`relative z-10 mt-6 md:mt-0 flex items-center gap-2 px-8 py-3 rounded-full text-sm font-bold transition-transform hover:scale-105 ${
                         dark
-                          ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
-                          : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                          ? "bg-neutral-900 text-white"
+                          : "bg-white text-[#4F6F52]"
                       }`}
                     >
                       <Icon name="play_arrow" className="text-base" />
-                      {r.routine_name}
+                      Start Routine
                     </button>
-                  ))}
-                </div>
+                  </div>
+                ))}
               </div>
             )}
             <WorkoutLogger
@@ -481,25 +492,11 @@ export default function WorkoutsPage() {
         )}
 
         {activeSection === "history" && (
-          <Card>
-            <div className="flex items-center justify-between mb-4">
-              <h2
-                className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}
-              >
-                Workout History
-              </h2>
-              <span
-                className={`text-xs font-medium px-2 py-0.5 rounded-full ${dark ? "bg-slate-700 text-slate-400" : "bg-slate-100 text-slate-500"}`}
-              >
-                {workouts.length}
-              </span>
-            </div>
-            <WorkoutHistory
-              workouts={workouts}
-              exercises={exercises}
-              onRefresh={refreshWorkouts}
-            />
-          </Card>
+          <WorkoutHistory
+            workouts={workouts}
+            exercises={exercises}
+            onRefresh={refreshWorkouts}
+          />
         )}
 
         {activeSection === "progress" && (

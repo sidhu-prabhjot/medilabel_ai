@@ -43,9 +43,9 @@ function DayCell({
   onChanged: () => void;
   dark: boolean;
 }) {
-  const muted = dark ? "text-slate-400" : "text-slate-500";
-  const [showPicker, setShowPicker] = useState(false);
-  const [adding, setAdding] = useState(false);
+  const muted        = dark ? "text-neutral-400" : "text-[#A3B18A]";
+  const [showPicker,   setShowPicker]   = useState(false);
+  const [adding,       setAdding]       = useState(false);
   const [togglingRest, setTogglingRest] = useState(false);
 
   const routineMap = new Map(routines.map((r) => [r.id, r]));
@@ -80,24 +80,27 @@ function DayCell({
     }
   }
 
-  const assignedRoutineIds = new Set(assignments.map((a) => a.routine_id));
-  const availableRoutines = routines.filter((r) => !assignedRoutineIds.has(r.id));
-  const isRest = restDay !== null;
+  const assignedRoutineIds  = new Set(assignments.map((a) => a.routine_id));
+  const availableRoutines   = routines.filter((r) => !assignedRoutineIds.has(r.id));
+  const isRest              = restDay !== null;
 
   return (
     <div
-      className={`flex flex-col gap-1.5 min-h-[6rem] rounded-xl border p-3 transition-colors ${
+      className={`flex flex-col gap-1.5 min-h-[6rem] rounded-xl border p-3 transition-all duration-200 ${
         isRest
-          ? dark ? "bg-slate-800/50 border-slate-700 opacity-60" : "bg-slate-50 border-slate-200 opacity-70"
-          : dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+          ? dark
+            ? "bg-neutral-950/50 border-neutral-800 opacity-60"
+            : "bg-[#F5F3EE] border-[#DAD7CD]/30 opacity-70"
+          : dark
+            ? "bg-neutral-900 border-neutral-800"
+            : "bg-white border-[#DAD7CD]/30 shadow-[0_4px_16px_-4px_rgba(47,62,47,0.06)]"
       }`}
     >
       {/* Day label */}
       <div className="flex items-center justify-between">
-        <span className={`text-xs font-semibold uppercase tracking-wide ${muted}`}>
+        <span className={`text-[10px] font-bold uppercase tracking-widest ${muted}`}>
           {DAYS[weekday]}
         </span>
-        {/* Rest toggle — only show when no routines assigned, or already rest */}
         {(isRest || assignments.length === 0) && (
           <button
             onClick={handleToggleRest}
@@ -105,8 +108,8 @@ function DayCell({
             title={isRest ? "Unmark rest day" : "Mark as rest day"}
             className={`text-xs transition-colors disabled:opacity-40 ${
               isRest
-                ? dark ? "text-slate-500 hover:text-slate-300" : "text-slate-400 hover:text-slate-600"
-                : dark ? "text-slate-600 hover:text-slate-400" : "text-slate-300 hover:text-slate-500"
+                ? dark ? "text-neutral-500 hover:text-neutral-300" : "text-[#A3B18A] hover:text-[#4F6F52]"
+                : dark ? "text-neutral-700 hover:text-neutral-500" : "text-[#DAD7CD] hover:text-[#A3B18A]"
             }`}
           >
             <Icon name={isRest ? "close" : "hotel"} className="text-sm" />
@@ -114,19 +117,22 @@ function DayCell({
         )}
       </div>
 
-      {/* Rest day badge */}
       {isRest && (
-        <span className={`text-xs font-medium ${muted}`}>Rest day</span>
+        <span className={`text-[10px] font-medium uppercase tracking-wider ${muted}`}>
+          Rest day
+        </span>
       )}
 
-      {/* Assigned routines (hidden on rest days) */}
+      {/* Assigned routines */}
       {!isRest && assignments.map((a) => {
         const routine = routineMap.get(a.routine_id);
         return (
           <div
             key={a.id}
-            className={`flex items-center justify-between gap-1 px-2 py-1 rounded-lg text-xs font-medium ${
-              dark ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-50 text-indigo-700"
+            className={`flex items-center justify-between gap-1 px-2 py-1 rounded-lg text-xs font-bold ${
+              dark
+                ? "bg-[#4F6F52]/20 text-green-400"
+                : "bg-[#4F6F52]/10 text-[#4F6F52]"
             }`}
           >
             <span className="truncate">{routine?.routine_name ?? `Routine #${a.routine_id}`}</span>
@@ -140,17 +146,23 @@ function DayCell({
         );
       })}
 
-      {/* Add button / picker (hidden on rest days) */}
+      {/* Add button / picker */}
       {!isRest && availableRoutines.length > 0 && (
         showPicker ? (
-          <div className={`rounded-lg border space-y-0.5 overflow-hidden ${dark ? "border-slate-600" : "border-slate-200"}`}>
+          <div
+            className={`rounded-lg border space-y-0.5 overflow-hidden ${
+              dark ? "border-neutral-700 bg-neutral-900" : "border-[#DAD7CD]/40 bg-white"
+            }`}
+          >
             {availableRoutines.map((r) => (
               <button
                 key={r.id}
                 onClick={() => handleAdd(r.id)}
                 disabled={adding}
                 className={`w-full text-left px-2 py-1.5 text-xs transition-colors ${
-                  dark ? "hover:bg-slate-600 text-slate-300" : "hover:bg-slate-50 text-slate-700"
+                  dark
+                    ? "hover:bg-neutral-800 text-neutral-300"
+                    : "hover:bg-[#F5F3EE] text-[#4F6F52]"
                 }`}
               >
                 {r.routine_name}
@@ -158,7 +170,9 @@ function DayCell({
             ))}
             <button
               onClick={() => setShowPicker(false)}
-              className={`w-full text-center px-2 py-1 text-xs ${muted} border-t ${dark ? "border-slate-600" : "border-slate-200"}`}
+              className={`w-full text-center px-2 py-1 text-xs border-t ${
+                dark ? "border-neutral-700 text-neutral-500" : "border-[#DAD7CD]/40 text-[#A3B18A]"
+              }`}
             >
               Cancel
             </button>
@@ -166,7 +180,7 @@ function DayCell({
         ) : (
           <button
             onClick={() => setShowPicker(true)}
-            className={`flex items-center gap-1 text-xs transition-colors ${muted} hover:${dark ? "text-slate-200" : "text-slate-600"}`}
+            className={`flex items-center gap-1 text-xs transition-colors ${muted} hover:opacity-70`}
           >
             <Icon name="add" className="text-sm" />
             Add
@@ -181,22 +195,20 @@ function DayCell({
 
 export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
-  const muted = dark ? "text-slate-400" : "text-slate-500";
+  const heading = dark ? "text-white"       : "text-[#4F6F52]";
+  const muted   = dark ? "text-neutral-400" : "text-[#A3B18A]";
 
-  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(
-    plans[0]?.id ?? null,
-  );
-  const [planDays, setPlanDays] = useState<PlanRoutineDay[]>([]);
-  const [planRestDays, setPlanRestDays] = useState<PlanRestDay[]>([]);
-  const [loadingDays, setLoadingDays] = useState(false);
+  const [selectedPlanId, setSelectedPlanId] = useState<number | null>(plans[0]?.id ?? null);
+  const [planDays,       setPlanDays]        = useState<PlanRoutineDay[]>([]);
+  const [planRestDays,   setPlanRestDays]    = useState<PlanRestDay[]>([]);
+  const [loadingDays,    setLoadingDays]     = useState(false);
 
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [planName, setPlanName] = useState("");
-  const [planDesc, setPlanDesc] = useState("");
-  const [creating, setCreating] = useState(false);
-  const [deletingId, setDeletingId] = useState<number | null>(null);
-  const [activatingId, setActivatingId] = useState<number | null>(null);
+  const [planName,       setPlanName]       = useState("");
+  const [planDesc,       setPlanDesc]       = useState("");
+  const [creating,       setCreating]       = useState(false);
+  const [deletingId,     setDeletingId]     = useState<number | null>(null);
+  const [activatingId,   setActivatingId]   = useState<number | null>(null);
 
   const loadDays = useCallback(async () => {
     if (!selectedPlanId) { setPlanDays([]); setPlanRestDays([]); return; }
@@ -215,11 +227,13 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
 
   useEffect(() => { loadDays(); }, [loadDays]);
 
-  const inputCls = `w-full px-3 py-2 rounded-lg border text-sm transition-colors ${
+  const inputCls = `w-full px-4 py-3.5 rounded-lg border-none outline-none text-sm focus:ring-2 transition-colors ${
     dark
-      ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-green-700"
+      : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]/20"
   }`;
+
+  const labelCls = `text-[11px] font-bold tracking-widest uppercase px-1 ${muted}`;
 
   async function handleCreatePlan(e: React.SyntheticEvent) {
     e.preventDefault();
@@ -227,7 +241,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
     setCreating(true);
     try {
       const newPlan = await createPlan({
-        name: planName.trim(),
+        name:        planName.trim(),
         description: planDesc.trim() || undefined,
       });
       setPlanName("");
@@ -263,30 +277,34 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
 
   const selectedPlan = plans.find((p) => p.id === selectedPlanId);
 
-  // Group plan days by weekday
   const dayMap = new Map<number, PlanRoutineDay[]>();
   for (let i = 0; i < 7; i++) dayMap.set(i, []);
   for (const d of planDays) {
     dayMap.get(d.weekday)?.push(d);
   }
 
-  // Map weekday → rest day row (for O(1) lookup in DayCell)
   const restDayMap = new Map<number, PlanRestDay>();
   for (const rd of planRestDays) {
     restDayMap.set(rd.weekday, rd);
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className={`text-sm font-semibold ${heading}`}>Weekly Plan</h2>
+        <h2 className={`text-[11px] font-bold tracking-[0.2em] uppercase ${muted}`}>
+          Weekly Plan
+        </h2>
         <button
           onClick={() => setShowCreateForm((v) => !v)}
-          className={`flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-lg transition-colors ${
+          className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-full uppercase tracking-widest transition-all duration-200 ${
             showCreateForm
-              ? dark ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-600"
-              : "bg-indigo-600 hover:bg-indigo-700 text-white"
+              ? dark
+                ? "bg-neutral-800 text-neutral-300"
+                : "bg-[#F5F3EE] text-[#4F6F52]"
+              : dark
+                ? "bg-green-700 hover:bg-green-600 text-white"
+                : "bg-[#4F6F52] hover:bg-[#3d5a3e] text-white"
           }`}
         >
           <Icon name={showCreateForm ? "expand_less" : "add"} className="text-sm" />
@@ -298,24 +316,39 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
       {showCreateForm && (
         <form
           onSubmit={handleCreatePlan}
-          className={`rounded-xl border p-4 space-y-3 ${
-            dark ? "bg-slate-700/30 border-slate-700" : "bg-slate-50 border-slate-200"
+          className={`rounded-3xl border p-6 space-y-4 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
+            dark
+              ? "bg-neutral-900 border-neutral-800"
+              : "bg-white border-[#DAD7CD]/40"
           }`}
         >
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col gap-1">
-              <label className={`text-xs font-medium ${muted}`}>Plan Name *</label>
-              <input value={planName} onChange={(e) => setPlanName(e.target.value)} placeholder="e.g. 5-day PPL" required className={inputCls} />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="flex flex-col gap-1.5">
+              <label className={labelCls}>Plan Name *</label>
+              <input
+                value={planName}
+                onChange={(e) => setPlanName(e.target.value)}
+                placeholder="e.g. 5-day PPL"
+                required
+                className={inputCls}
+              />
             </div>
-            <div className="flex flex-col gap-1">
-              <label className={`text-xs font-medium ${muted}`}>Description</label>
-              <input value={planDesc} onChange={(e) => setPlanDesc(e.target.value)} placeholder="Optional" className={inputCls} />
+            <div className="flex flex-col gap-1.5">
+              <label className={labelCls}>Description</label>
+              <input
+                value={planDesc}
+                onChange={(e) => setPlanDesc(e.target.value)}
+                placeholder="Optional"
+                className={inputCls}
+              />
             </div>
           </div>
           <button
             type="submit"
             disabled={creating || !planName.trim()}
-            className="flex items-center gap-1.5 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+            className={`flex items-center gap-1.5 px-6 py-3 rounded-full text-white text-sm font-bold uppercase tracking-widest disabled:opacity-50 transition-all hover:scale-[1.01] ${
+              dark ? "bg-green-700 hover:bg-green-600" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
+            }`}
           >
             <Icon name="add" className="text-base" />
             {creating ? "Creating…" : "Create Plan"}
@@ -323,21 +356,29 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
         </form>
       )}
 
-      {/* Plan tabs */}
+      {/* Plan selector tabs */}
       {plans.length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           {plans.map((p) => (
             <div key={p.id} className="flex items-center gap-1">
               <button
                 onClick={() => setSelectedPlanId(p.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                   selectedPlanId === p.id
-                    ? dark ? "bg-indigo-500/20 text-indigo-300" : "bg-indigo-50 text-indigo-700"
-                    : dark ? "text-slate-400 hover:bg-slate-700" : "text-slate-500 hover:bg-slate-100"
+                    ? dark
+                      ? "bg-[#4F6F52]/20 text-green-400"
+                      : "bg-[#4F6F52]/10 text-[#4F6F52]"
+                    : dark
+                      ? "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
+                      : "text-[#A3B18A] hover:bg-[#F5F3EE] hover:text-[#4F6F52]"
                 }`}
               >
                 {p.is_active && (
-                  <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${dark ? "bg-emerald-400" : "bg-emerald-500"}`} />
+                  <span
+                    className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                      dark ? "bg-green-400" : "bg-[#4F6F52]"
+                    }`}
+                  />
                 )}
                 {p.name}
               </button>
@@ -346,8 +387,10 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
                   onClick={() => handleActivatePlan(p.id)}
                   disabled={activatingId === p.id}
                   title="Set as active plan"
-                  className={`p-1 rounded-lg text-xs transition-colors disabled:opacity-40 ${
-                    dark ? "text-slate-500 hover:text-emerald-400" : "text-slate-400 hover:text-emerald-600"
+                  className={`p-1.5 rounded-full transition-colors disabled:opacity-40 ${
+                    dark
+                      ? "text-neutral-600 hover:text-green-400 hover:bg-green-900/20"
+                      : "text-[#DAD7CD] hover:text-[#4F6F52] hover:bg-[#4F6F52]/5"
                   }`}
                 >
                   <Icon name="check_circle" className="text-sm" />
@@ -356,8 +399,10 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
               <button
                 onClick={() => handleDeletePlan(p.id)}
                 disabled={deletingId === p.id}
-                className={`p-1 rounded-lg transition-colors disabled:opacity-40 ${
-                  dark ? "text-slate-600 hover:text-red-400" : "text-slate-300 hover:text-red-500"
+                className={`p-1.5 rounded-full transition-colors disabled:opacity-40 ${
+                  dark
+                    ? "text-neutral-700 hover:text-red-400 hover:bg-red-500/10"
+                    : "text-[#DAD7CD] hover:text-red-500 hover:bg-red-50"
                 }`}
               >
                 <Icon name="close" className="text-xs" />
@@ -371,11 +416,13 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
       {selectedPlan ? (
         loadingDays ? (
           <div className={`flex items-center gap-2 py-6 text-sm ${muted}`}>
-            <Icon name="progress_activity" className="text-base" />
+            <Icon name="progress_activity" className="text-base animate-spin" />
             Loading schedule…
           </div>
         ) : routines.length === 0 ? (
-          <p className={`text-sm ${muted}`}>Create some routines first, then assign them to days here.</p>
+          <p className={`text-sm ${muted}`}>
+            Create some routines first, then assign them to days here.
+          </p>
         ) : (
           <div className="grid grid-cols-7 gap-2">
             {Array.from({ length: 7 }, (_, i) => (
@@ -393,9 +440,11 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
           </div>
         )
       ) : (
-        <div className={`flex flex-col items-center gap-2 py-8 ${muted}`}>
-          <Icon name="calendar_month" className="text-4xl opacity-40" />
-          <p className="text-sm">No plans yet. Create one to build your weekly schedule.</p>
+        <div className={`flex flex-col items-center gap-3 py-16 ${muted}`}>
+          <Icon name="calendar_month" className="text-5xl opacity-30" />
+          <p className="text-sm font-medium">
+            No plans yet. Create one to build your weekly schedule.
+          </p>
         </div>
       )}
     </div>
