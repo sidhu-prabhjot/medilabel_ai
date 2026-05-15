@@ -299,7 +299,7 @@ export default function WorkoutsPage() {
       label: "Current Streak",
       value: streak > 0 ? String(streak) : "—",
       unit: "Weeks",
-      barColor: "bg-green-700",
+      barColor: "bg-[#37563b]",
     },
     {
       label: "This Week",
@@ -334,13 +334,13 @@ export default function WorkoutsPage() {
                 className={`rounded-xl border p-5 h-28 animate-pulse ${
                   dark
                     ? "bg-neutral-900 border-neutral-800"
-                    : "bg-white border-[#DAD7CD]/30"
+                    : "bg-white border-[#c2c8bf]/30"
                 }`}
               />
             ))}
           </div>
           <div
-            className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#DAD7CD]/30"}`}
+            className={`rounded-xl border p-5 h-64 animate-pulse ${dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#c2c8bf]/30"}`}
           />
         </div>
       </AppLayout>
@@ -362,22 +362,22 @@ export default function WorkoutsPage() {
         {/* Session PR banner */}
         {sessionPRs.length > 0 && (
           <div
-            className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-green-900/20 border-green-800/40" : "bg-[#4F6F52]/5 border-[#DAD7CD]"}`}
+            className={`rounded-xl border p-4 flex items-start gap-3 ${dark ? "bg-[#2f4e33]/20 border-[#37563b]/40" : "bg-[#4F6F52]/5 border-[#c2c8bf]"}`}
           >
             <Icon
               name="emoji_events"
-              className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-green-400" : "text-green-700"}`}
+              className={`text-xl flex-shrink-0 mt-0.5 ${dark ? "text-[#acd0ad]" : "text-[#37563b]"}`}
             />
             <div className="flex-1">
               <p
-                className={`text-sm font-semibold mb-1 ${dark ? "text-green-300" : "text-green-800"}`}
+                className={`text-sm font-semibold mb-1 ${dark ? "text-[#acd0ad]" : "text-[#2f4e33]"}`}
               >
                 New Personal Record{sessionPRs.length > 1 ? "s" : ""} this session!
               </p>
               {sessionPRs.map((pr) => (
                 <p
                   key={pr.exercise.id}
-                  className={`text-sm ${dark ? "text-green-200" : "text-green-900"}`}
+                  className={`text-sm ${dark ? "text-[#c8ecc8]" : "text-[#2f4e33]"}`}
                 >
                   {pr.exercise.exercise_name} — {pr.maxWeightKg} kg
                   {pr.repsAtMax > 0 ? ` × ${pr.repsAtMax}` : ""}
@@ -386,7 +386,7 @@ export default function WorkoutsPage() {
             </div>
             <button
               onClick={() => setSessionPRs([])}
-              className={`p-1 rounded ${dark ? "text-green-500 hover:text-green-300" : "text-green-600 hover:text-green-800"}`}
+              className={`p-1 rounded ${dark ? "text-[#37563b] hover:text-[#acd0ad]" : "text-green-600 hover:text-[#2f4e33]"}`}
             >
               <Icon name="close" className="text-base" />
             </button>
@@ -394,7 +394,7 @@ export default function WorkoutsPage() {
         )}
 
         {/* Section nav — underline tabs */}
-        <div className={`flex border-b ${dark ? "border-neutral-800" : "border-[#DAD7CD]/40"}`}>
+        <div className={`flex border-b ${dark ? "border-neutral-800" : "border-[#c2c8bf]/40"}`}>
           {SECTIONS.map((s) => (
             <button
               key={s.id}
@@ -402,8 +402,8 @@ export default function WorkoutsPage() {
               className={`px-4 py-3 text-xs font-bold uppercase tracking-widest border-b-2 transition-colors whitespace-nowrap ${
                 activeSection === s.id
                   ? dark
-                    ? "border-green-500 text-green-400"
-                    : "border-[#E27D60] text-[#E27D60]"
+                    ? "border-green-500 text-[#acd0ad]"
+                    : "border-[#37563b] text-[#37563b]"
                   : dark
                     ? "border-transparent text-neutral-500 hover:text-neutral-300"
                     : "border-transparent text-[#A3B18A] hover:text-[#4F6F52]"
@@ -439,7 +439,7 @@ export default function WorkoutsPage() {
                   <div
                     key={r.id}
                     className={`relative overflow-hidden rounded-xl p-8 flex flex-col md:flex-row items-start md:items-center justify-between shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
-                      dark ? "bg-green-900/40" : "bg-[#4F6F52]"
+                      dark ? "bg-[#2f4e33]/40" : "bg-[#4F6F52]"
                     }`}
                   >
                     {/* Decorative circle */}
@@ -448,7 +448,7 @@ export default function WorkoutsPage() {
                     <div className="relative z-10">
                       <span
                         className={`inline-block text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 ${
-                          dark ? "bg-green-800/60 text-green-300" : "bg-white/20 text-white"
+                          dark ? "bg-green-800/60 text-[#acd0ad]" : "bg-white/20 text-white"
                         }`}
                       >
                         Today's Plan

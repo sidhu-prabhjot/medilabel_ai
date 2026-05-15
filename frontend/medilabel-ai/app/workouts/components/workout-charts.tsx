@@ -227,7 +227,7 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
             }
             className={`text-sm px-3 py-2 rounded-lg border-none outline-none focus:ring-2 transition-colors ${
               dark
-                ? "bg-neutral-800 text-white focus:ring-green-700"
+                ? "bg-neutral-800 text-white focus:ring-[#37563b]"
                 : "bg-[#F5F3EE] text-[#4F6F52] focus:ring-[#4F6F52]/20"
             }`}
           >
@@ -287,7 +287,7 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
             <thead>
               <tr
                 className={`border-b text-left ${
-                  dark ? "border-neutral-800" : "border-[#DAD7CD]/40"
+                  dark ? "border-neutral-800" : "border-[#c2c8bf]/40"
                 }`}
               >
                 <th className={`py-2 font-bold text-[10px] uppercase tracking-[0.2em] ${muted}`}>Exercise</th>
@@ -302,7 +302,7 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
                 <tr
                   key={pr.exercise.id}
                   className={`border-b transition-colors ${
-                    dark ? "border-neutral-800" : "border-[#DAD7CD]/20"
+                    dark ? "border-neutral-800" : "border-[#c2c8bf]/20"
                   }`}
                 >
                   <td className={`py-3 font-semibold ${heading}`}>{pr.exercise.exercise_name}</td>
@@ -310,7 +310,7 @@ export default function WorkoutCharts({ enrichedWorkouts, exercises, loading }: 
                   <td className="text-right tabular-nums">
                     <span
                       className={`text-sm font-bold ${
-                        dark ? "text-green-400" : "text-[#4F6F52]"
+                        dark ? "text-[#acd0ad]" : "text-[#4F6F52]"
                       }`}
                     >
                       {pr.maxWeightKg} kg

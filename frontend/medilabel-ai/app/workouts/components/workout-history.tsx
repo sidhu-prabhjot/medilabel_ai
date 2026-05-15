@@ -156,7 +156,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
             placeholder="Search workouts…"
             className={`w-full border-none rounded-xl py-3 pl-12 pr-4 text-sm outline-none focus:ring-2 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] transition-shadow ${
               dark
-                ? "bg-neutral-900 text-white placeholder-neutral-500 focus:ring-green-700"
+                ? "bg-neutral-900 text-white placeholder-neutral-500 focus:ring-[#37563b]"
                 : "bg-white text-[#4F6F52] placeholder-[#A3B18A] focus:ring-[#4F6F52]/20"
             }`}
           />
@@ -164,7 +164,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
 
         <div
           className={`flex items-center p-1.5 rounded-full shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] border ${
-            dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#DAD7CD]/30"
+            dark ? "bg-neutral-900 border-neutral-800" : "bg-white border-[#c2c8bf]/30"
           }`}
         >
           {RANGE_LABELS.map((r) => (
@@ -174,7 +174,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
               className={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-all ${
                 range === r.value
                   ? dark
-                    ? "bg-green-700 text-white"
+                    ? "bg-[#37563b] text-white"
                     : "bg-[#4F6F52] text-[#F5F3EE]"
                   : dark
                     ? "text-neutral-400 hover:text-neutral-200"
@@ -215,11 +215,11 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
                 className={`rounded-3xl border overflow-hidden transition-all duration-200 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
                   isExpanded
                     ? dark
-                      ? "border-green-800/40 border-2 bg-neutral-900"
+                      ? "border-[#37563b]/40 border-2 bg-neutral-900"
                       : "border-[#4F6F52]/20 border-2 bg-white shadow-md"
                     : dark
                       ? "border-neutral-800 bg-neutral-900"
-                      : "border-[#DAD7CD]/50 bg-white"
+                      : "border-[#c2c8bf]/50 bg-white"
                 }`}
               >
                 {/* Row header */}
@@ -266,7 +266,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
                       className={`w-10 h-10 rounded-full flex items-center justify-center transition-colors ${
                         isExpanded
                           ? dark
-                            ? "bg-green-900/40 text-green-400"
+                            ? "bg-[#2f4e33]/40 text-[#acd0ad]"
                             : "bg-[#4F6F52]/10 text-[#4F6F52]"
                           : dark
                             ? "text-neutral-400 hover:bg-neutral-800"
@@ -287,7 +287,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
                     className={`px-8 py-6 space-y-6 border-t ${
                       dark
                         ? "bg-neutral-950/60 border-neutral-800"
-                        : "bg-[#F5F3EE]/40 border-[#DAD7CD]/30"
+                        : "bg-[#F5F3EE]/40 border-[#c2c8bf]/30"
                     }`}
                   >
                     {w.notes && (
@@ -318,7 +318,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
                                   className={`p-3 rounded-xl border text-center ${
                                     dark
                                       ? "bg-neutral-900 border-neutral-800"
-                                      : "bg-white border-[#DAD7CD]/30"
+                                      : "bg-white border-[#c2c8bf]/30"
                                   }`}
                                 >
                                   <p className={`text-[10px] uppercase tracking-tighter mb-1 ${muted}`}>
@@ -358,7 +358,7 @@ export default function WorkoutHistory({ workouts, exercises, onRefresh }: Props
             onClick={() => setVisibleCount((prev) => prev + PAGE_SIZE)}
             className={`px-8 py-3 rounded-full border font-bold text-sm uppercase tracking-widest transition-all duration-300 ${
               dark
-                ? "border-green-700 text-green-400 hover:bg-green-700 hover:text-white"
+                ? "border-green-700 text-[#acd0ad] hover:bg-[#37563b] hover:text-white"
                 : "border-[#4F6F52] text-[#4F6F52] hover:bg-[#4F6F52] hover:text-white"
             }`}
           >

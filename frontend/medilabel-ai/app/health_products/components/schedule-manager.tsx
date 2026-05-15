@@ -72,7 +72,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
   const inputClass = `w-full rounded-lg border px-3 py-2 text-sm ${
     dark
       ? "bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-      : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
+      : "bg-white border-[#c2c8bf] text-[#1a1c1a] placeholder:text-slate-400"
   }`;
 
   function frequencyLabel(n: number) {
@@ -85,15 +85,15 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+        <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
           Medication Schedules
         </h3>
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             dark
-              ? "bg-indigo-500/15 text-indigo-400 hover:bg-indigo-500/25"
-              : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+              ? "bg-[#37563b]/15 text-[#acd0ad] hover:bg-[#37563b]/25"
+              : "bg-[#c8ecc8] text-[#2f4e33] hover:bg-[#c8ecc8]"
           }`}
         >
           <Icon name={showForm ? "close" : "add"} className="text-base" />
@@ -104,7 +104,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
       {showForm && (
         <form
           onSubmit={handleSubmit}
-          className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-200"}`}
+          className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-[#f4f4ef] border-[#c2c8bf]"}`}
         >
           {userMedications.length === 0 ? (
             <p className={`text-sm ${dark ? "text-amber-400" : "text-amber-600"}`}>
@@ -114,7 +114,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     Medication *
                   </label>
                   <select
@@ -134,7 +134,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     Frequency *
                   </label>
                   <select
@@ -151,7 +151,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     Dose amount *
                   </label>
                   <input
@@ -167,7 +167,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     Dose unit
                   </label>
                   <input
@@ -179,7 +179,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     Start date *
                   </label>
                   <input
@@ -192,7 +192,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     First dose time *
                   </label>
                   <input
@@ -205,7 +205,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
                 </div>
 
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>
                     End date
                   </label>
                   <input
@@ -220,7 +220,7 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
               <button
                 type="submit"
                 disabled={saving}
-                className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-[#37563b] text-white hover:bg-[#2f4e33] disabled:opacity-50 transition-colors"
               >
                 {saving ? "Saving..." : "Save schedule"}
               </button>
@@ -240,11 +240,11 @@ export default function ScheduleManager({ schedules, userMedications, onRefresh 
           <li
             key={s.schedule_id}
             className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
-              dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+              dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]"
             }`}
           >
             <div>
-              <p className={`text-sm font-medium ${dark ? "text-white" : "text-slate-900"}`}>
+              <p className={`text-sm font-medium ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                 {s.medication_name ?? `Medication #${s.medication_id}`}
               </p>
               <p className={`text-xs mt-0.5 ${dark ? "text-slate-400" : "text-slate-500"}`}>

@@ -83,7 +83,7 @@ function SetInput({
       placeholder={placeholder}
       className={`w-full px-2 py-1.5 rounded-lg text-sm text-center transition-colors border-none outline-none focus:ring-2 ${
         dark
-          ? "bg-neutral-800 text-white placeholder-neutral-600 focus:ring-green-600"
+          ? "bg-neutral-800 text-white placeholder-neutral-600 focus:ring-[#37563b]"
           : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]"
       }`}
     />
@@ -103,7 +103,7 @@ export default function WorkoutLogger({
   const { dark } = useTheme();
   const heading = dark ? "text-white" : "text-[#4F6F52]";
   const muted = dark ? "text-neutral-400" : "text-[#A3B18A]";
-  const divider = dark ? "border-neutral-800" : "border-[#DAD7CD]/40";
+  const divider = dark ? "border-neutral-800" : "border-[#c2c8bf]/40";
 
   const today = new Date().toISOString().slice(0, 10);
   const [workoutName, setWorkoutName] = useState("");
@@ -179,7 +179,7 @@ export default function WorkoutLogger({
 
   const inputCls = `w-full px-4 py-3.5 rounded-lg text-sm transition-colors border-none outline-none focus:ring-2 ${
     dark
-      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-green-600"
+      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-[#37563b]"
       : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]"
   }`;
   const labelCls = `text-[11px] font-bold tracking-widest uppercase px-1 ${
@@ -380,7 +380,7 @@ export default function WorkoutLogger({
       {/* Active routine banner */}
       {initialPreset && (
         <div className={`flex items-center justify-between px-4 py-3 rounded-lg text-sm ${
-          dark ? "bg-green-900/20 text-green-400" : "bg-[#4F6F52]/8 text-[#4F6F52]"
+          dark ? "bg-[#2f4e33]/20 text-[#acd0ad]" : "bg-[#4F6F52]/8 text-[#4F6F52]"
         }`}>
           <span>Routine: <span className="font-bold">{initialPreset.name}</span></span>
           <button
@@ -449,7 +449,7 @@ export default function WorkoutLogger({
                 className={`rounded-xl border p-4 space-y-3 ${
                   dark
                     ? "bg-neutral-800/40 border-neutral-700"
-                    : "bg-[#F5F3EE]/50 border-[#DAD7CD]"
+                    : "bg-[#F5F3EE]/50 border-[#c2c8bf]"
                 }`}
               >
                 {/* Exercise header */}
@@ -571,7 +571,7 @@ export default function WorkoutLogger({
                         title="Duplicate set"
                         className={`flex justify-center p-1 rounded transition-colors ${
                           dark
-                            ? "text-neutral-500 hover:text-green-400"
+                            ? "text-neutral-500 hover:text-[#acd0ad]"
                             : "text-[#A3B18A] hover:text-[#4F6F52]"
                         }`}
                       >
@@ -597,7 +597,7 @@ export default function WorkoutLogger({
                   onClick={() => addSetToExercise(le.tempId)}
                   className={`flex items-center gap-1 text-xs font-bold transition-colors ${
                     dark
-                      ? "text-green-400 hover:text-green-300"
+                      ? "text-[#acd0ad] hover:text-[#acd0ad]"
                       : "text-[#4F6F52] hover:text-[#4F6F52]/70"
                   }`}
                 >
@@ -622,7 +622,7 @@ export default function WorkoutLogger({
               onClick={() => setShowPicker(true)}
               className={`flex items-center gap-1.5 text-xs font-bold px-4 py-2 rounded-full transition-colors ${
                 dark
-                  ? "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                  ? "bg-[#2f4e33]/30 text-[#acd0ad] hover:bg-[#2f4e33]/50"
                   : "bg-[#A3B18A]/20 text-[#4F6F52] hover:bg-[#A3B18A]/30"
               }`}
             >
@@ -643,7 +643,7 @@ export default function WorkoutLogger({
         ) : loggedExercises.length === 0 ? (
           <div
             className={`p-14 border-2 border-dashed rounded-xl flex flex-col items-center text-center ${
-              dark ? "border-neutral-700" : "border-[#DAD7CD]"
+              dark ? "border-neutral-700" : "border-[#c2c8bf]"
             }`}
           >
             <Icon
@@ -664,7 +664,7 @@ export default function WorkoutLogger({
           disabled={saving || !workoutName.trim()}
           className={`flex-1 flex items-center justify-center gap-2 py-4 rounded-full text-sm font-bold transition-all disabled:opacity-50 shadow-lg shadow-[#4F6F52]/20 hover:scale-[1.01] ${
             dark
-              ? "bg-green-700 hover:bg-green-600 text-white"
+              ? "bg-[#37563b] hover:bg-[#2f4e33] text-white"
               : "bg-[#4F6F52] hover:bg-[#4F6F52]/90 text-white"
           }`}
         >
@@ -676,7 +676,7 @@ export default function WorkoutLogger({
           className={`px-10 py-4 rounded-full text-sm font-bold transition-colors border ${
             dark
               ? "border-neutral-700 text-neutral-400 hover:bg-neutral-800"
-              : "border-[#DAD7CD] text-[#A3B18A] hover:bg-[#F5F3EE]"
+              : "border-[#c2c8bf] text-[#A3B18A] hover:bg-[#F5F3EE]"
           }`}
         >
           Discard
@@ -687,15 +687,15 @@ export default function WorkoutLogger({
       {/* New PR celebration */}
       {newPRs.length > 0 && (
         <div
-          className={`rounded-xl border p-4 ${dark ? "bg-green-900/20 border-green-800/40" : "bg-[#4F6F52]/5 border-[#DAD7CD]"}`}
+          className={`rounded-xl border p-4 ${dark ? "bg-[#2f4e33]/20 border-[#37563b]/40" : "bg-[#4F6F52]/5 border-[#c2c8bf]"}`}
         >
           <div className="flex items-center gap-2 mb-2">
             <Icon
               name="emoji_events"
-              className={`text-base ${dark ? "text-green-400" : "text-[#4F6F52]"}`}
+              className={`text-base ${dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}`}
             />
             <span
-              className={`text-sm font-bold ${dark ? "text-green-300" : "text-[#4F6F52]"}`}
+              className={`text-sm font-bold ${dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}`}
             >
               New Personal Record{newPRs.length > 1 ? "s" : ""}!
             </span>
@@ -703,7 +703,7 @@ export default function WorkoutLogger({
           {newPRs.map((pr) => (
             <p
               key={pr.exercise.id}
-              className={`text-sm ${dark ? "text-green-200" : "text-[#4F6F52]"}`}
+              className={`text-sm ${dark ? "text-[#c8ecc8]" : "text-[#4F6F52]"}`}
             >
               {pr.exercise.exercise_name} — {pr.maxWeightKg} kg
               {pr.repsAtMax > 0 ? ` × ${pr.repsAtMax} reps` : ""}

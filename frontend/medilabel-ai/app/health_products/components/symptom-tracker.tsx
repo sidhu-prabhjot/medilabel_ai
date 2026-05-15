@@ -15,8 +15,8 @@ interface Props {
 
 function SeverityBadge({ level, dark }: { level: number; dark: boolean }) {
   const configs = [
-    { label: "Mild", color: dark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 text-emerald-700" },
-    { label: "Mild", color: dark ? "bg-emerald-500/20 text-emerald-400" : "bg-emerald-50 text-emerald-700" },
+    { label: "Mild", color: dark ? "bg-[#c8ecc8]0/20 text-[#acd0ad]" : "bg-[#c8ecc8] text-[#2f4e33]" },
+    { label: "Mild", color: dark ? "bg-[#c8ecc8]0/20 text-[#acd0ad]" : "bg-[#c8ecc8] text-[#2f4e33]" },
     { label: "Moderate", color: dark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700" },
     { label: "Moderate", color: dark ? "bg-amber-500/20 text-amber-400" : "bg-amber-50 text-amber-700" },
     { label: "Severe", color: dark ? "bg-red-500/20 text-red-400" : "bg-red-50 text-red-700" },
@@ -48,7 +48,7 @@ function SymptomForm({
   const inputCls = `w-full px-3 py-1.5 rounded-lg border text-sm transition-colors ${
     dark
       ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      : "bg-white border-slate-300 text-[#1a1c1a] placeholder-slate-400"
   }`;
 
   async function handleSubmit(e: React.SyntheticEvent) {
@@ -101,7 +101,7 @@ function SymptomForm({
             max={5}
             value={severity}
             onChange={(e) => setSeverity(Number((e.target as HTMLInputElement).value))}
-            className="flex-1 accent-indigo-500"
+            className="flex-1 accent-[#37563b]"
           />
           <span className={`text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>Severe</span>
         </div>
@@ -126,7 +126,7 @@ function SymptomForm({
         <button
           type="submit"
           disabled={loading || !symptom.trim()}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#37563b] hover:bg-[#2f4e33] text-white text-sm font-medium disabled:opacity-50 transition-colors"
         >
           <Icon name="add" className="text-base" />
           {loading ? "Logging…" : "Log Symptom"}
@@ -137,7 +137,7 @@ function SymptomForm({
           className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             dark
               ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              : "bg-[#eeeeea] hover:bg-[#e8e8e4] text-[#1a1c1a]"
           }`}
         >
           Cancel
@@ -151,7 +151,7 @@ function SymptomForm({
 
 export default function SymptomTracker({ symptoms, onRefresh }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
+  const heading = dark ? "text-white" : "text-[#1a1c1a]";
   const muted = dark ? "text-slate-400" : "text-slate-500";
   const divider = dark ? "border-slate-700" : "border-slate-100";
 
@@ -190,8 +190,8 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
             showForm
               ? dark
                 ? "bg-slate-700 text-slate-300"
-                : "bg-slate-100 text-slate-600"
-              : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                : "bg-[#eeeeea] text-[#424841]"
+              : "bg-[#37563b] hover:bg-[#2f4e33] text-white"
           }`}
         >
           <Icon name={showForm ? "expand_less" : "add"} className="text-sm" />
@@ -203,7 +203,7 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
       {showForm && (
         <div
           className={`mb-5 p-4 rounded-xl border ${
-            dark ? "bg-slate-700/30 border-slate-700" : "bg-slate-50 border-slate-200"
+            dark ? "bg-slate-700/30 border-slate-700" : "bg-[#f4f4ef] border-[#c2c8bf]"
           }`}
         >
           <SymptomForm
@@ -232,7 +232,7 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
               {/* Resolved indicator */}
               <div
                 className={`mt-0.5 w-2 h-2 rounded-full flex-shrink-0 ${
-                  s.is_resolved ? "bg-emerald-500" : "bg-amber-400"
+                  s.is_resolved ? "bg-[#c8ecc8]0" : "bg-amber-400"
                 }`}
                 title={s.is_resolved ? "Resolved" : "Active"}
               />
@@ -242,7 +242,7 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
                   <span className={`font-medium text-sm ${heading}`}>{s.symptom}</span>
                   <SeverityBadge level={s.severity} dark={dark} />
                   {s.is_resolved && (
-                    <span className={`text-xs ${dark ? "text-emerald-400" : "text-emerald-600"}`}>
+                    <span className={`text-xs ${dark ? "text-[#acd0ad]" : "text-[#37563b]"}`}>
                       Resolved
                     </span>
                   )}
@@ -267,8 +267,8 @@ export default function SymptomTracker({ symptoms, onRefresh }: Props) {
                   title="Mark as resolved"
                   className={`p-1.5 rounded-lg flex-shrink-0 transition-colors disabled:opacity-40 ${
                     dark
-                      ? "hover:bg-emerald-500/15 text-slate-500 hover:text-emerald-400"
-                      : "hover:bg-emerald-50 text-slate-400 hover:text-emerald-600"
+                      ? "hover:bg-[#c8ecc8]0/15 text-slate-500 hover:text-[#acd0ad]"
+                      : "hover:bg-[#c8ecc8] text-slate-400 hover:text-[#37563b]"
                   }`}
                 >
                   <Icon name="check_circle" className="text-base" />

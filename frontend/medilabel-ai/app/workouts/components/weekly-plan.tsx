@@ -90,10 +90,10 @@ function DayCell({
         isRest
           ? dark
             ? "bg-neutral-950/50 border-neutral-800 opacity-60"
-            : "bg-[#F5F3EE] border-[#DAD7CD]/30 opacity-70"
+            : "bg-[#F5F3EE] border-[#c2c8bf]/30 opacity-70"
           : dark
             ? "bg-neutral-900 border-neutral-800"
-            : "bg-white border-[#DAD7CD]/30 shadow-[0_4px_16px_-4px_rgba(47,62,47,0.06)]"
+            : "bg-white border-[#c2c8bf]/30 shadow-[0_4px_16px_-4px_rgba(47,62,47,0.06)]"
       }`}
     >
       {/* Day label */}
@@ -131,7 +131,7 @@ function DayCell({
             key={a.id}
             className={`flex items-center justify-between gap-1 px-2 py-1 rounded-lg text-xs font-bold ${
               dark
-                ? "bg-[#4F6F52]/20 text-green-400"
+                ? "bg-[#4F6F52]/20 text-[#acd0ad]"
                 : "bg-[#4F6F52]/10 text-[#4F6F52]"
             }`}
           >
@@ -151,7 +151,7 @@ function DayCell({
         showPicker ? (
           <div
             className={`rounded-lg border space-y-0.5 overflow-hidden ${
-              dark ? "border-neutral-700 bg-neutral-900" : "border-[#DAD7CD]/40 bg-white"
+              dark ? "border-neutral-700 bg-neutral-900" : "border-[#c2c8bf]/40 bg-white"
             }`}
           >
             {availableRoutines.map((r) => (
@@ -171,7 +171,7 @@ function DayCell({
             <button
               onClick={() => setShowPicker(false)}
               className={`w-full text-center px-2 py-1 text-xs border-t ${
-                dark ? "border-neutral-700 text-neutral-500" : "border-[#DAD7CD]/40 text-[#A3B18A]"
+                dark ? "border-neutral-700 text-neutral-500" : "border-[#c2c8bf]/40 text-[#A3B18A]"
               }`}
             >
               Cancel
@@ -229,7 +229,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
 
   const inputCls = `w-full px-4 py-3.5 rounded-lg border-none outline-none text-sm focus:ring-2 transition-colors ${
     dark
-      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-green-700"
+      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-[#37563b]"
       : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]/20"
   }`;
 
@@ -303,7 +303,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
                 ? "bg-neutral-800 text-neutral-300"
                 : "bg-[#F5F3EE] text-[#4F6F52]"
               : dark
-                ? "bg-green-700 hover:bg-green-600 text-white"
+                ? "bg-[#37563b] hover:bg-[#2f4e33] text-white"
                 : "bg-[#4F6F52] hover:bg-[#3d5a3e] text-white"
           }`}
         >
@@ -319,7 +319,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
           className={`rounded-3xl border p-6 space-y-4 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
             dark
               ? "bg-neutral-900 border-neutral-800"
-              : "bg-white border-[#DAD7CD]/40"
+              : "bg-white border-[#c2c8bf]/40"
           }`}
         >
           <div className="grid grid-cols-2 gap-4">
@@ -347,7 +347,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
             type="submit"
             disabled={creating || !planName.trim()}
             className={`flex items-center gap-1.5 px-6 py-3 rounded-full text-white text-sm font-bold uppercase tracking-widest disabled:opacity-50 transition-all hover:scale-[1.01] ${
-              dark ? "bg-green-700 hover:bg-green-600" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
+              dark ? "bg-[#37563b] hover:bg-[#2f4e33]" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
             }`}
           >
             <Icon name="add" className="text-base" />
@@ -366,7 +366,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
                 className={`flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                   selectedPlanId === p.id
                     ? dark
-                      ? "bg-[#4F6F52]/20 text-green-400"
+                      ? "bg-[#4F6F52]/20 text-[#acd0ad]"
                       : "bg-[#4F6F52]/10 text-[#4F6F52]"
                     : dark
                       ? "text-neutral-500 hover:bg-neutral-800 hover:text-neutral-300"
@@ -389,7 +389,7 @@ export default function WeeklyPlan({ plans, routines, onRefresh }: Props) {
                   title="Set as active plan"
                   className={`p-1.5 rounded-full transition-colors disabled:opacity-40 ${
                     dark
-                      ? "text-neutral-600 hover:text-green-400 hover:bg-green-900/20"
+                      ? "text-neutral-600 hover:text-[#acd0ad] hover:bg-[#2f4e33]/20"
                       : "text-[#DAD7CD] hover:text-[#4F6F52] hover:bg-[#4F6F52]/5"
                   }`}
                 >

@@ -29,11 +29,11 @@ export default function SupplementChecklist({ items, onToggle }: Props) {
           <li
             key={item.supplement_id}
             className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
-              dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+              dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]"
             }`}
           >
             <div>
-              <p className={`text-sm font-medium ${dark ? "text-white" : "text-slate-900"}`}>
+              <p className={`text-sm font-medium ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                 {item.name}
               </p>
               {(item.dosage_amount || item.form) && (
@@ -50,11 +50,11 @@ export default function SupplementChecklist({ items, onToggle }: Props) {
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 taken
                   ? dark
-                    ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
-                    : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                    ? "bg-[#c8ecc8]0/15 text-[#acd0ad] hover:bg-[#c8ecc8]0/25"
+                    : "bg-[#c8ecc8] text-[#2f4e33] hover:bg-[#c8ecc8]"
                   : dark
                     ? "bg-slate-700 text-slate-300 hover:bg-slate-600"
-                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                    : "bg-[#eeeeea] text-[#424841] hover:bg-[#e8e8e4]"
               }`}
             >
               <Icon name={taken ? "check_circle" : "radio_button_unchecked"} className="text-base" />

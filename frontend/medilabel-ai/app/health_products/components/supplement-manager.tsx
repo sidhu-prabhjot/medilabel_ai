@@ -47,21 +47,21 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
   const inputClass = `w-full rounded-lg border px-3 py-2 text-sm ${
     dark
       ? "bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
-      : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
+      : "bg-white border-[#c2c8bf] text-[#1a1c1a] placeholder:text-slate-400"
   }`;
 
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+        <h3 className={`text-sm font-semibold ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
           My Supplements
         </h3>
         <button
           onClick={() => setShowForm((prev) => !prev)}
           className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             dark
-              ? "bg-indigo-500/15 text-indigo-400 hover:bg-indigo-500/25"
-              : "bg-indigo-50 text-indigo-700 hover:bg-indigo-100"
+              ? "bg-[#37563b]/15 text-[#acd0ad] hover:bg-[#37563b]/25"
+              : "bg-[#c8ecc8] text-[#2f4e33] hover:bg-[#c8ecc8]"
           }`}
         >
           <Icon name={showForm ? "close" : "add"} className="text-base" />
@@ -70,10 +70,10 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
+        <form onSubmit={handleSubmit} className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-[#f4f4ef] border-[#c2c8bf]"}`}>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Name *</label>
+              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>Name *</label>
               <input
                 required
                 className={inputClass}
@@ -83,7 +83,7 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Brand</label>
+              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>Brand</label>
               <input
                 className={inputClass}
                 placeholder="e.g. NOW Foods"
@@ -92,7 +92,7 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Amount</label>
+              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>Amount</label>
               <input
                 type="number"
                 min={0}
@@ -103,7 +103,7 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Unit</label>
+              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>Unit</label>
               <input
                 className={inputClass}
                 placeholder="e.g. mg"
@@ -112,7 +112,7 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
               />
             </div>
             <div>
-              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Form</label>
+              <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-[#424841]"}`}>Form</label>
               <input
                 className={inputClass}
                 placeholder="e.g. capsule, powder"
@@ -126,8 +126,8 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
             disabled={saving}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               dark
-                ? "bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50"
-                : "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
+                ? "bg-[#37563b] text-white hover:bg-[#37563b] disabled:opacity-50"
+                : "bg-[#37563b] text-white hover:bg-[#2f4e33] disabled:opacity-50"
             }`}
           >
             {saving ? "Saving..." : "Save supplement"}
@@ -146,11 +146,11 @@ export default function SupplementManager({ supplements, onRefresh }: Props) {
           <li
             key={s.supplement_id}
             className={`flex items-center justify-between rounded-lg border px-4 py-3 ${
-              dark ? "bg-slate-800 border-slate-700" : "bg-white border-slate-200"
+              dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]"
             }`}
           >
             <div>
-              <p className={`text-sm font-medium ${dark ? "text-white" : "text-slate-900"}`}>
+              <p className={`text-sm font-medium ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                 {s.name}
               </p>
               <p className={`text-xs mt-0.5 ${dark ? "text-slate-400" : "text-slate-500"}`}>

@@ -21,16 +21,16 @@ interface Props {
   userMedications: UserMedication[];
 }
 
-const BRAND_COLOR = "#a78bfa";   // purple-400
-const GENERIC_COLOR = "#6366f1"; // indigo-500
-const BAR_COLOR = "#6366f1";
+const BRAND_COLOR = "#acd0ad";   // primary-dark
+const GENERIC_COLOR = "#37563b"; // primary
+const BAR_COLOR = "#37563b";
 const BAR_LOW_COLOR = "#f59e0b"; // amber-400  — stock ≤ 5
 
 const PIE_COLORS = [BRAND_COLOR, GENERIC_COLOR];
 
 export default function MedicationCharts({ userMedications }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
+  const heading = dark ? "text-white" : "text-[#1a1c1a]";
   const muted = dark ? "text-slate-400" : "text-slate-500";
   const tooltipStyle = {
     backgroundColor: dark ? "#1e293b" : "#fff",

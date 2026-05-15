@@ -33,7 +33,7 @@ function RestockForm({
   const inputCls = `w-full px-3 py-1.5 rounded-lg border text-sm transition-colors ${
     dark
       ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      : "bg-white border-slate-300 text-[#1a1c1a] placeholder-slate-400"
   }`;
 
   async function handleSubmit(e: React.SyntheticEvent) {
@@ -57,7 +57,7 @@ function RestockForm({
     <form
       onSubmit={handleSubmit}
       className={`mt-2 mb-3 p-3 rounded-lg space-y-3 ${
-        dark ? "bg-slate-700/40" : "bg-slate-50"
+        dark ? "bg-slate-700/40" : "bg-[#f4f4ef]"
       }`}
     >
       <p
@@ -125,7 +125,7 @@ function RestockForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[#37563b] hover:bg-[#2f4e33] text-white text-xs font-medium disabled:opacity-50 transition-colors"
         >
           <Icon name="add" className="text-sm" />
           {loading ? "Saving…" : "Save"}
@@ -135,8 +135,8 @@ function RestockForm({
           onClick={onDone}
           className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
             dark
-              ? "bg-slate-600 hover:bg-slate-500 text-slate-300"
-              : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+              ? "bg-slate-600 hover:bg-[#f4f4ef]0 text-slate-300"
+              : "bg-[#e8e8e4] hover:bg-[#c2c8bf] text-[#1a1c1a]"
           }`}
         >
           Cancel
@@ -182,7 +182,7 @@ function ExpiryBadge({
   }
   return (
     <span
-      className={`text-xs tabular-nums ${dark ? "text-slate-300" : "text-slate-700"}`}
+      className={`text-xs tabular-nums ${dark ? "text-slate-300" : "text-[#1a1c1a]"}`}
     >
       {expiry.toLocaleDateString()}
     </span>
@@ -193,9 +193,9 @@ function ExpiryBadge({
 
 export default function MedicationTable({ userMedications, onRefresh }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
+  const heading = dark ? "text-white" : "text-[#1a1c1a]";
   const muted = dark ? "text-slate-400" : "text-slate-500";
-  const divider = dark ? "border-slate-700" : "border-slate-200";
+  const divider = dark ? "border-slate-700" : "border-[#c2c8bf]";
 
   const [restockingId, setRestockingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
@@ -273,11 +273,11 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                   className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                     medication.is_brand
                       ? dark
-                        ? "bg-purple-500/20 text-purple-300"
-                        : "bg-purple-50 text-purple-700"
+                        ? "bg-[#dae8be]0/20 text-[#acd0ad]"
+                        : "bg-[#dae8be] text-[#566342]"
                       : dark
                         ? "bg-slate-600 text-slate-300"
-                        : "bg-slate-100 text-slate-600"
+                        : "bg-[#eeeeea] text-[#424841]"
                   }`}
                 >
                   {medication.is_brand ? "Brand" : "Generic"}
@@ -285,7 +285,7 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
 
                 {/* Quantity */}
                 <span
-                  className={`tabular-nums text-xs min-w-[4rem] text-right ${dark ? "text-slate-300" : "text-slate-700"}`}
+                  className={`tabular-nums text-xs min-w-[4rem] text-right ${dark ? "text-slate-300" : "text-[#1a1c1a]"}`}
                 >
                   {stock.quantity != null ? (
                     `${stock.quantity}${stock.unit ? ` ${stock.unit}` : ""}`
@@ -317,8 +317,8 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                     title="Add stock"
                     className={`p-1.5 rounded-lg transition-colors ${
                       dark
-                        ? "hover:bg-slate-600 text-slate-400 hover:text-indigo-300"
-                        : "hover:bg-slate-100 text-slate-400 hover:text-indigo-600"
+                        ? "hover:bg-slate-600 text-slate-400 hover:text-[#acd0ad]"
+                        : "hover:bg-[#eeeeea] text-slate-400 hover:text-[#37563b]"
                     }`}
                   >
                     <Icon name="add_box" className="text-base" />

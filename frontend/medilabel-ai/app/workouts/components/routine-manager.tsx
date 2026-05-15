@@ -51,7 +51,7 @@ function AddSetForm({
 
   const inputCls = `w-full px-2 py-1.5 rounded-lg border-none outline-none text-sm text-center focus:ring-2 transition-colors ${
     dark
-      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-green-700"
+      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-[#37563b]"
       : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]/20"
   }`;
 
@@ -86,7 +86,7 @@ function AddSetForm({
         onClick={handleAdd}
         disabled={loading || !targetReps}
         className={`flex justify-center items-center p-1.5 rounded-lg text-white disabled:opacity-50 transition-colors ${
-          dark ? "bg-green-700 hover:bg-green-600" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
+          dark ? "bg-[#37563b] hover:bg-[#2f4e33]" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
         }`}
       >
         <Icon name={loading ? "progress_activity" : "add"} className="text-base" />
@@ -215,11 +215,11 @@ function RoutineCard({
       className={`rounded-3xl border overflow-hidden transition-all duration-200 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
         expanded
           ? dark
-            ? "border-green-800/40 border-2 bg-neutral-900"
+            ? "border-[#37563b]/40 border-2 bg-neutral-900"
             : "border-[#4F6F52]/20 border-2 bg-white shadow-md"
           : dark
             ? "border-neutral-800 bg-neutral-900"
-            : "border-[#DAD7CD]/50 bg-white"
+            : "border-[#c2c8bf]/50 bg-white"
       }`}
     >
       {/* Header */}
@@ -228,7 +228,7 @@ function RoutineCard({
           <button
             onClick={loadDetail}
             className={`flex items-center gap-2 transition-colors ${
-              dark ? "text-green-400 hover:text-green-300" : "text-[#4F6F52] hover:text-[#3d5a3e]"
+              dark ? "text-[#acd0ad] hover:text-[#acd0ad]" : "text-[#4F6F52] hover:text-[#3d5a3e]"
             }`}
           >
             <Icon
@@ -276,7 +276,7 @@ function RoutineCard({
             title="Start workout from this routine"
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider transition-colors ${
               dark
-                ? "bg-green-900/30 text-green-400 hover:bg-green-900/50"
+                ? "bg-[#2f4e33]/30 text-[#acd0ad] hover:bg-[#2f4e33]/50"
                 : "bg-[#4F6F52]/10 text-[#4F6F52] hover:bg-[#4F6F52]/20"
             }`}
           >
@@ -303,7 +303,7 @@ function RoutineCard({
           className={`px-6 pb-6 pt-4 space-y-5 border-t ${
             dark
               ? "bg-neutral-950/60 border-neutral-800"
-              : "bg-[#F5F3EE]/40 border-[#DAD7CD]/30"
+              : "bg-[#F5F3EE]/40 border-[#c2c8bf]/30"
           }`}
         >
           {routineExercises.length === 0 && (
@@ -339,7 +339,7 @@ function RoutineCard({
               {ee.sets.length > 0 && (
                 <div
                   className={`mb-2 rounded-xl overflow-hidden border ${
-                    dark ? "border-neutral-800" : "border-[#DAD7CD]/30"
+                    dark ? "border-neutral-800" : "border-[#c2c8bf]/30"
                   }`}
                 >
                   <div
@@ -377,7 +377,7 @@ function RoutineCard({
                             title="Duplicate set"
                             className={`transition-colors ${
                               dark
-                                ? "text-neutral-700 hover:text-green-400"
+                                ? "text-neutral-700 hover:text-[#acd0ad]"
                                 : "text-[#DAD7CD] hover:text-[#4F6F52]"
                             }`}
                           >
@@ -422,7 +422,7 @@ function RoutineCard({
             <button
               onClick={() => setShowExPicker(true)}
               className={`flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider transition-colors ${
-                dark ? "text-green-400 hover:text-green-300" : "text-[#4F6F52] hover:text-[#3d5a3e]"
+                dark ? "text-[#acd0ad] hover:text-[#acd0ad]" : "text-[#4F6F52] hover:text-[#3d5a3e]"
               }`}
             >
               <Icon name="add_circle" className="text-base" />
@@ -456,7 +456,7 @@ export default function RoutineManager({
 
   const inputCls = `w-full px-4 py-3.5 rounded-lg border-none outline-none text-sm focus:ring-2 transition-colors ${
     dark
-      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-green-700"
+      ? "bg-neutral-800 text-white placeholder-neutral-500 focus:ring-[#37563b]"
       : "bg-[#F5F3EE] text-[#4F6F52] placeholder-[#A3B18A]/60 focus:ring-[#4F6F52]/20"
   }`;
 
@@ -505,7 +505,7 @@ export default function RoutineManager({
                 ? "bg-neutral-800 text-neutral-300"
                 : "bg-[#F5F3EE] text-[#4F6F52]"
               : dark
-                ? "bg-green-700 hover:bg-green-600 text-white"
+                ? "bg-[#37563b] hover:bg-[#2f4e33] text-white"
                 : "bg-[#4F6F52] hover:bg-[#3d5a3e] text-white"
           }`}
         >
@@ -521,7 +521,7 @@ export default function RoutineManager({
           className={`rounded-3xl border p-6 space-y-4 shadow-[0_10px_40px_-10px_rgba(47,62,47,0.08)] ${
             dark
               ? "bg-neutral-900 border-neutral-800"
-              : "bg-white border-[#DAD7CD]/40"
+              : "bg-white border-[#c2c8bf]/40"
           }`}
         >
           <div className="flex flex-col gap-1.5">
@@ -547,7 +547,7 @@ export default function RoutineManager({
             type="submit"
             disabled={creating || !routineName.trim()}
             className={`flex items-center gap-1.5 px-6 py-3 rounded-full text-white text-sm font-bold uppercase tracking-widest disabled:opacity-50 transition-all hover:scale-[1.01] ${
-              dark ? "bg-green-700 hover:bg-green-600" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
+              dark ? "bg-[#37563b] hover:bg-[#2f4e33]" : "bg-[#4F6F52] hover:bg-[#3d5a3e]"
             }`}
           >
             <Icon name="add" className="text-base" />

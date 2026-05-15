@@ -78,12 +78,12 @@ function StatCard({
   return (
     <div
       className={`p-6 rounded-[2rem] border flex flex-col gap-1 transition-colors ${
-        dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#DAD7CD] shadow-sm"
+        dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf] shadow-sm"
       }`}
     >
       <span
         className={`text-[11px] font-bold uppercase tracking-[0.15em] ${
-          dark ? "text-emerald-600" : "text-[#A3B18A]"
+          dark ? "text-[#37563b]" : "text-[#A3B18A]"
         }`}
       >
         {label}
@@ -126,21 +126,21 @@ function DoseCard({
           taken
             ? dark
               ? "bg-slate-700/40 border-slate-700 opacity-60"
-              : "bg-white/50 border-[#DAD7CD]/30 opacity-60"
+              : "bg-white/50 border-[#c2c8bf]/30 opacity-60"
             : dark
               ? "bg-slate-800 border-slate-700 hover:shadow-md"
-              : "bg-white border-[#DAD7CD]/50 shadow-sm hover:shadow-md"
+              : "bg-white border-[#c2c8bf]/50 shadow-sm hover:shadow-md"
         }`}
       >
         <div className="flex items-center gap-6">
           <div
             className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-              dark ? "bg-emerald-900/30" : "bg-[#4F6F52]/5"
+              dark ? "bg-[#2f4e33]/30" : "bg-[#4F6F52]/5"
             }`}
           >
             <Icon
               name="pill"
-              className={`text-3xl ${dark ? "text-emerald-400" : "text-[#4F6F52]"}`}
+              className={`text-3xl ${dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}`}
             />
           </div>
           <div>
@@ -171,7 +171,7 @@ function DoseCard({
             onClick={() => onLog(item.schedule_id, false, item.dose_amount)}
             className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all active:scale-90 ${
               dark
-                ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white"
+                ? "border-emerald-500 text-[#acd0ad] hover:bg-[#c8ecc8]0 hover:text-white"
                 : "border-[#4F6F52] text-[#4F6F52] hover:bg-[#4F6F52] hover:text-white"
             }`}
           >
@@ -206,21 +206,21 @@ function SupplementRow({
         taken
           ? dark
             ? "bg-slate-700/40 border-slate-700 opacity-60"
-            : "bg-white/50 border-[#DAD7CD]/30 opacity-60"
+            : "bg-white/50 border-[#c2c8bf]/30 opacity-60"
           : dark
             ? "bg-slate-800 border-slate-700 hover:shadow-md"
-            : "bg-white border-[#DAD7CD]/50 shadow-sm hover:shadow-md"
+            : "bg-white border-[#c2c8bf]/50 shadow-sm hover:shadow-md"
       }`}
     >
       <div className="flex items-center gap-6">
         <div
           className={`w-16 h-16 rounded-2xl flex items-center justify-center ${
-            dark ? "bg-emerald-900/20" : "bg-[#A3B18A]/10"
+            dark ? "bg-[#2f4e33]/20" : "bg-[#A3B18A]/10"
           }`}
         >
           <Icon
             name="nutrition"
-            className={`text-3xl ${dark ? "text-emerald-500" : "text-[#A3B18A]"}`}
+            className={`text-3xl ${dark ? "text-[#37563b]" : "text-[#A3B18A]"}`}
           />
         </div>
         <div>
@@ -255,7 +255,7 @@ function SupplementRow({
           onClick={() => onToggle(item.supplement_id)}
           className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all active:scale-90 ${
             dark
-              ? "border-emerald-500 text-emerald-400 hover:bg-emerald-500 hover:text-white"
+              ? "border-emerald-500 text-[#acd0ad] hover:bg-[#c8ecc8]0 hover:text-white"
               : "border-[#4F6F52] text-[#4F6F52] hover:bg-[#4F6F52] hover:text-white"
           }`}
         >
@@ -367,10 +367,10 @@ export default function MedicationPage() {
 
   // ── Style shorthands ──────────────────────────────────────────────────────────
 
-  const textPrimary = dark ? "text-emerald-400" : "text-[#37563b]";
+  const textPrimary = dark ? "text-[#acd0ad]" : "text-[#37563b]";
   const textMuted = dark ? "text-slate-400" : "text-[#A3B18A]";
-  const borderColor = dark ? "border-slate-700" : "border-[#DAD7CD]/50";
-  const surface = dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#DAD7CD]/50";
+  const borderColor = dark ? "border-slate-700" : "border-[#c2c8bf]/50";
+  const surface = dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]/50";
 
   // ── Loading skeleton ──────────────────────────────────────────────────────────
 
@@ -383,14 +383,14 @@ export default function MedicationPage() {
               <div
                 key={i}
                 className={`rounded-[2rem] border p-6 h-28 animate-pulse ${
-                  dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#DAD7CD]"
+                  dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]"
                 }`}
               />
             ))}
           </div>
           <div
             className={`rounded-[2rem] border p-8 h-64 animate-pulse ${
-              dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#DAD7CD]"
+              dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]"
             }`}
           />
         </div>
@@ -411,21 +411,21 @@ export default function MedicationPage() {
             label="Taken Today"
             value={String(takenToday)}
             unit={`of ${schedulesToday.length} doses`}
-            valueClass={dark ? "text-emerald-400" : "text-[#4F6F52]"}
+            valueClass={dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}
           />
           <StatCard
             dark={dark}
             label="Remaining"
             value={String(remainingToday)}
             unit="to take"
-            valueClass={dark ? "text-emerald-400" : "text-[#4F6F52]"}
+            valueClass={dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}
           />
           <StatCard
             dark={dark}
             label="Stock Alerts"
             value={String(expiringSoon.length)}
             unit="expiring soon"
-            valueClass={expiringSoon.length > 0 ? "text-red-500" : dark ? "text-emerald-400" : "text-[#4F6F52]"}
+            valueClass={expiringSoon.length > 0 ? "text-red-500" : dark ? "text-[#acd0ad]" : "text-[#4F6F52]"}
           />
           <StatCard
             dark={dark}
@@ -436,7 +436,7 @@ export default function MedicationPage() {
                 : "—"
             }
             unit={nextDose ? (nextDose.getHours() < 12 ? "AM" : "PM") : "none scheduled"}
-            valueClass={dark ? "text-emerald-400" : "text-[#566342]"}
+            valueClass={dark ? "text-[#acd0ad]" : "text-[#566342]"}
           />
         </div>
 
@@ -449,7 +449,7 @@ export default function MedicationPage() {
               className={`relative py-2 font-semibold transition-colors text-sm ${
                 activeTab === tab.id
                   ? dark
-                    ? "text-emerald-400 after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-full after:h-[3px] after:bg-emerald-400 after:rounded-full"
+                    ? "text-[#acd0ad] after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-full after:h-[3px] after:bg-[#acd0ad] after:rounded-full"
                     : "text-orange-500 after:content-[''] after:absolute after:bottom-[-2px] after:left-0 after:w-full after:h-[3px] after:bg-orange-500 after:rounded-full"
                   : dark
                     ? "text-slate-500 hover:text-slate-300"
@@ -473,7 +473,7 @@ export default function MedicationPage() {
                   className={`p-5 rounded-2xl border flex items-center justify-between ${
                     dark
                       ? "bg-amber-900/20 border-amber-700/40"
-                      : "bg-[#4F6F52]/5 border-[#DAD7CD]"
+                      : "bg-[#4F6F52]/5 border-[#c2c8bf]"
                   }`}
                 >
                   <div className="flex items-center gap-4">
@@ -496,7 +496,7 @@ export default function MedicationPage() {
                 <h3 className={`text-xl font-bold ${textPrimary}`}>Today's Schedule</h3>
                 <div
                   className={`flex gap-1 p-1.5 rounded-full border ${
-                    dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#DAD7CD]/30 shadow-sm"
+                    dark ? "bg-slate-800 border-slate-700" : "bg-white border-[#c2c8bf]/30 shadow-sm"
                   }`}
                 >
                   {(["morning", "afternoon", "evening"] as TimeOfDay[]).map((tod) => (
@@ -562,7 +562,7 @@ export default function MedicationPage() {
                 <div
                   className={`p-8 rounded-[2rem] relative overflow-hidden ${
                     dark
-                      ? "bg-emerald-900 text-white shadow-xl shadow-emerald-900/20"
+                      ? "bg-[#2f4e33] text-white shadow-xl shadow-emerald-900/20"
                       : "bg-[#4F6F52] text-white shadow-xl shadow-[#4F6F52]/10"
                   }`}
                 >
@@ -637,7 +637,7 @@ export default function MedicationPage() {
           <div className="space-y-6">
             <Card>
               <div className="flex items-center justify-between mb-4">
-                <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+                <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                   Search Medications
                 </h2>
                 <span className={`text-xs ${dark ? "text-slate-500" : "text-slate-400"}`}>
@@ -649,12 +649,12 @@ export default function MedicationPage() {
 
             <Card>
               <div className="flex items-center justify-between mb-4">
-                <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-slate-900"}`}>
+                <h2 className={`text-sm font-semibold ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                   My Medications
                 </h2>
                 <span
                   className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                    dark ? "bg-slate-700 text-slate-400" : "bg-slate-100 text-slate-500"
+                    dark ? "bg-slate-700 text-slate-400" : "bg-[#eeeeea] text-slate-500"
                   }`}
                 >
                   {userMedications.length}

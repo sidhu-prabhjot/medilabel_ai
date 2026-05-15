@@ -47,7 +47,7 @@ export default function ExercisePicker({
   const inputCls = `w-full px-3 py-1.5 rounded-lg border text-sm transition-colors ${
     dark
       ? "bg-slate-600 border-slate-500 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      : "bg-white border-slate-300 text-[#1a1c1a] placeholder-slate-400"
   }`;
 
   async function handleCreate(e: React.SyntheticEvent) {
@@ -73,7 +73,7 @@ export default function ExercisePicker({
   return (
     <div
       className={`rounded-xl border p-3 space-y-2 ${
-        dark ? "bg-slate-700 border-slate-600" : "bg-white border-slate-200"
+        dark ? "bg-slate-700 border-slate-600" : "bg-white border-[#c2c8bf]"
       }`}
     >
       {/* Search bar */}
@@ -103,7 +103,7 @@ export default function ExercisePicker({
               className={`w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm text-left transition-colors ${
                 dark
                   ? "hover:bg-slate-600 text-slate-200"
-                  : "hover:bg-slate-50 text-slate-800"
+                  : "hover:bg-[#f4f4ef] text-slate-800"
               }`}
             >
               <span className="font-medium">{e.exercise_name}</span>
@@ -130,8 +130,8 @@ export default function ExercisePicker({
           onClick={() => setShowCreate(true)}
           className={`flex items-center gap-1.5 w-full px-3 py-2 rounded-lg text-sm font-medium border-t transition-colors ${
             dark
-              ? "border-slate-600 text-indigo-400 hover:text-indigo-300"
-              : "border-slate-100 text-indigo-600 hover:text-indigo-700"
+              ? "border-slate-600 text-[#acd0ad] hover:text-[#acd0ad]"
+              : "border-slate-100 text-[#37563b] hover:text-[#2f4e33]"
           }`}
         >
           <Icon name="add_circle" className="text-base" />
@@ -140,7 +140,7 @@ export default function ExercisePicker({
       ) : (
         <form
           onSubmit={handleCreate}
-          className={`border-t pt-3 space-y-2 ${dark ? "border-slate-600" : "border-slate-200"}`}
+          className={`border-t pt-3 space-y-2 ${dark ? "border-slate-600" : "border-[#c2c8bf]"}`}
         >
           <p className={`text-xs font-semibold uppercase tracking-wide ${muted}`}>
             New Exercise
@@ -189,7 +189,7 @@ export default function ExercisePicker({
             <button
               type="submit"
               disabled={creating || !newName.trim() || !newMuscle}
-              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+              className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#37563b] hover:bg-[#2f4e33] text-white text-sm font-medium disabled:opacity-50 transition-colors"
             >
               <Icon name="add" className="text-base" />
               {creating ? "Creating…" : "Create & Add"}
@@ -199,8 +199,8 @@ export default function ExercisePicker({
               onClick={() => setShowCreate(false)}
               className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                 dark
-                  ? "bg-slate-600 hover:bg-slate-500 text-slate-300"
-                  : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+                  ? "bg-slate-600 hover:bg-[#f4f4ef]0 text-slate-300"
+                  : "bg-[#eeeeea] hover:bg-[#e8e8e4] text-[#1a1c1a]"
               }`}
             >
               Back

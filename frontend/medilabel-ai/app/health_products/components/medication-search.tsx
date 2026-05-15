@@ -40,7 +40,7 @@ function StockForm({
   const inputCls = `w-full px-3 py-1.5 rounded-lg border text-sm transition-colors ${
     dark
       ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      : "bg-white border-slate-300 text-[#1a1c1a] placeholder-slate-400"
   }`;
 
   function handleSubmit(e: React.SyntheticEvent) {
@@ -126,7 +126,7 @@ function StockForm({
         <button
           type="submit"
           disabled={loading}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#37563b] hover:bg-[#2f4e33] text-white text-sm font-medium disabled:opacity-50 transition-colors"
         >
           <Icon name="add" className="text-base" />
           {loading ? "Adding…" : "Add to My Medications"}
@@ -137,7 +137,7 @@ function StockForm({
           className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
             dark
               ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              : "bg-[#eeeeea] hover:bg-[#e8e8e4] text-[#1a1c1a]"
           }`}
         >
           Cancel
@@ -151,7 +151,7 @@ function StockForm({
 
 export default function MedicationSearch({ onStockAdded }: Props) {
   const { dark } = useTheme();
-  const heading = dark ? "text-white" : "text-slate-900";
+  const heading = dark ? "text-white" : "text-[#1a1c1a]";
   const muted = dark ? "text-slate-400" : "text-slate-500";
 
   const [query, setQuery] = useState("");
@@ -238,7 +238,7 @@ export default function MedicationSearch({ onStockAdded }: Props) {
     return tty === "bn" || tty === "sbd";
   }
 
-  const rowHover = dark ? "hover:bg-slate-700/40" : "hover:bg-slate-50";
+  const rowHover = dark ? "hover:bg-slate-700/40" : "hover:bg-[#f4f4ef]";
   const divider = dark ? "border-slate-700" : "border-slate-100";
 
   return (
@@ -252,13 +252,13 @@ export default function MedicationSearch({ onStockAdded }: Props) {
           className={`flex-1 px-3 py-2 rounded-lg border text-sm transition-colors ${
             dark
               ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-              : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+              : "bg-white border-slate-300 text-[#1a1c1a] placeholder-slate-400"
           }`}
         />
         <button
           type="submit"
           disabled={searching || !query.trim()}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-[#37563b] hover:bg-[#2f4e33] disabled:opacity-50 text-white rounded-lg text-sm font-medium transition-colors"
         >
           <Icon
             name={searching ? "progress_activity" : "search"}
@@ -282,7 +282,7 @@ export default function MedicationSearch({ onStockAdded }: Props) {
 
           <table className="w-full text-sm">
             <thead>
-              <tr className={`border-b text-left ${dark ? "border-slate-700" : "border-slate-200"}`}>
+              <tr className={`border-b text-left ${dark ? "border-slate-700" : "border-[#c2c8bf]"}`}>
                 <th className={`py-2 font-medium text-xs uppercase tracking-wide ${muted}`}>Name</th>
                 <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>RXCUI</th>
                 <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Type</th>
@@ -302,18 +302,18 @@ export default function MedicationSearch({ onStockAdded }: Props) {
                         className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
                           isBrand(r)
                             ? dark
-                              ? "bg-purple-500/20 text-purple-300"
-                              : "bg-purple-50 text-purple-700"
+                              ? "bg-[#dae8be]0/20 text-[#acd0ad]"
+                              : "bg-[#dae8be] text-[#566342]"
                             : dark
                               ? "bg-slate-600 text-slate-300"
-                              : "bg-slate-100 text-slate-600"
+                              : "bg-[#eeeeea] text-[#424841]"
                         }`}
                       >
                         {displayTty(r)}
                       </span>
 
                       {addedIndices.has(i) ? (
-                        <span className="flex items-center gap-1 text-xs text-emerald-500 font-medium">
+                        <span className="flex items-center gap-1 text-xs text-[#37563b] font-medium">
                           <Icon name="check_circle" className="text-base" />
                           Added
                         </span>
@@ -326,8 +326,8 @@ export default function MedicationSearch({ onStockAdded }: Props) {
                             expandedIndex === i
                               ? dark
                                 ? "bg-slate-600 text-slate-300"
-                                : "bg-slate-200 text-slate-700"
-                              : "bg-indigo-600 hover:bg-indigo-700 text-white"
+                                : "bg-[#e8e8e4] text-[#1a1c1a]"
+                              : "bg-[#37563b] hover:bg-[#2f4e33] text-white"
                           }`}
                         >
                           <Icon
@@ -343,7 +343,7 @@ export default function MedicationSearch({ onStockAdded }: Props) {
                     {expandedIndex === i && (
                       <div
                         className={`mb-3 rounded-lg p-3 ${
-                          dark ? "bg-slate-700/40" : "bg-slate-50"
+                          dark ? "bg-slate-700/40" : "bg-[#f4f4ef]"
                         }`}
                       >
                         <StockForm

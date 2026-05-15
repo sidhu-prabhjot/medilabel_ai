@@ -36,12 +36,12 @@ export default function MedicationChecklist({ items, onLog }: Props) {
                   : "bg-red-50 border-red-200"
                 : dark
                   ? "bg-slate-800 border-slate-700"
-                  : "bg-white border-slate-200"
+                  : "bg-white border-[#c2c8bf]"
             }`}
           >
             <div>
               <div className="flex items-center gap-2">
-                <p className={`text-sm font-medium ${dark ? "text-white" : "text-slate-900"}`}>
+                <p className={`text-sm font-medium ${dark ? "text-white" : "text-[#1a1c1a]"}`}>
                   {item.medication_name}
                 </p>
                 {item.is_overdue && !taken && (
@@ -60,8 +60,8 @@ export default function MedicationChecklist({ items, onLog }: Props) {
             {taken || missed ? (
               <span className={`flex items-center gap-1 text-xs font-medium px-3 py-1.5 rounded-lg ${
                 taken
-                  ? dark ? "bg-emerald-500/15 text-emerald-400" : "bg-emerald-50 text-emerald-700"
-                  : dark ? "bg-slate-700 text-slate-400" : "bg-slate-100 text-slate-500"
+                  ? dark ? "bg-[#c8ecc8]0/15 text-[#acd0ad]" : "bg-[#c8ecc8] text-[#2f4e33]"
+                  : dark ? "bg-slate-700 text-slate-400" : "bg-[#eeeeea] text-slate-500"
               }`}>
                 <Icon name={taken ? "check_circle" : "cancel"} className="text-base" />
                 {taken ? "Taken" : "Missed"}
@@ -72,8 +72,8 @@ export default function MedicationChecklist({ items, onLog }: Props) {
                   onClick={() => onLog(item.schedule_id, "taken")}
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     dark
-                      ? "bg-emerald-500/15 text-emerald-400 hover:bg-emerald-500/25"
-                      : "bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
+                      ? "bg-[#c8ecc8]0/15 text-[#acd0ad] hover:bg-[#c8ecc8]0/25"
+                      : "bg-[#c8ecc8] text-[#2f4e33] hover:bg-[#c8ecc8]"
                   }`}
                 >
                   <Icon name="check" className="text-base" />
@@ -84,7 +84,7 @@ export default function MedicationChecklist({ items, onLog }: Props) {
                   className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                     dark
                       ? "bg-slate-700 text-slate-400 hover:bg-slate-600"
-                      : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                      : "bg-[#eeeeea] text-slate-500 hover:bg-[#e8e8e4]"
                   }`}
                 >
                   <Icon name="close" className="text-base" />
