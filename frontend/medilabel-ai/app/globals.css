@@ -1,8 +1,21 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf9f5;
+  --foreground: #1a1c1a;
+
+  /* Brand palette (from design system) */
+  --primary:              #37563b;
+  --primary-container:    #4f6f52;
+  --primary-fixed:        #c8ecc8;
+  --primary-fixed-dim:    #acd0ad;
+  --on-primary-fixed:     #03210b;
+  --on-primary-fixed-var: #2f4e33;
+  --secondary:            #566342;
+  --outline-variant:      #c2c8bf;
+  --surface:              #faf9f5;
+  --surface-container:    #eeeeea;
+  --surface-high:         #e8e8e4;
 }
 
 @theme inline {
