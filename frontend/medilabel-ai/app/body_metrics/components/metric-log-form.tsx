@@ -14,23 +14,22 @@ interface Props {
 export default function MetricLogForm({ onSaved, onCancel }: Props) {
   const { dark } = useTheme();
 
-  const [weightKg, setWeightKg] = useState("");
+  const [weightKg, setWeightKg]             = useState("");
   const [bodyFatPercent, setBodyFatPercent] = useState("");
-  // Default to right now, formatted for <input type="datetime-local">
-  const [recordedAt, setRecordedAt] = useState(
-    new Date().toISOString().slice(0, 16),
-  );
-  const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [recordedAt, setRecordedAt]         = useState(new Date().toISOString().slice(0, 16));
+  const [notes, setNotes]                   = useState("");
+  const [loading, setLoading]               = useState(false);
+  const [error, setError]                   = useState("");
 
-  const inputCls = `w-full px-3 py-1.5 rounded-lg border text-sm transition-colors ${
+  const textMuted = dark ? "text-slate-400" : "text-[#A3B18A]";
+
+  const inputCls = `w-full px-4 py-2.5 rounded-xl border text-sm transition-colors ${
     dark
-      ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400"
-      : "bg-white border-slate-300 text-slate-900 placeholder-slate-400"
+      ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-emerald-500 outline-none"
+      : "bg-white border-[#DAD7CD] text-slate-900 placeholder-[#A3B18A] focus:border-[#4F6F52] outline-none"
   }`;
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: { preventDefault: () => void }) {
     e.preventDefault();
     if (!weightKg) return;
 
@@ -55,13 +54,11 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
-        <div className="flex flex-col gap-1">
-          <label
-            className={`text-xs font-medium ${dark ? "text-slate-400" : "text-slate-500"}`}
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className={`text-[11px] font-bold uppercase tracking-[0.12em] ${textMuted}`}>
             Weight (kg) *
           </label>
           <input
@@ -77,10 +74,8 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            className={`text-xs font-medium ${dark ? "text-slate-400" : "text-slate-500"}`}
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className={`text-[11px] font-bold uppercase tracking-[0.12em] ${textMuted}`}>
             Body Fat %
           </label>
           <input
@@ -95,10 +90,8 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            className={`text-xs font-medium ${dark ? "text-slate-400" : "text-slate-500"}`}
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className={`text-[11px] font-bold uppercase tracking-[0.12em] ${textMuted}`}>
             Date &amp; Time
           </label>
           <input
@@ -109,10 +102,8 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
           />
         </div>
 
-        <div className="flex flex-col gap-1">
-          <label
-            className={`text-xs font-medium ${dark ? "text-slate-400" : "text-slate-500"}`}
-          >
+        <div className="flex flex-col gap-1.5">
+          <label className={`text-[11px] font-bold uppercase tracking-[0.12em] ${textMuted}`}>
             Notes
           </label>
           <input
@@ -128,11 +119,15 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
 
       {error && <p className="text-xs text-red-500">{error}</p>}
 
-      <div className="flex gap-2">
+      <div className="flex gap-3 pt-1">
         <button
           type="submit"
           disabled={loading || !weightKg}
-          className="flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium disabled:opacity-50 transition-colors"
+          className={`flex items-center gap-2 px-6 py-2.5 rounded-full text-white text-sm font-bold disabled:opacity-50 transition-all active:scale-95 ${
+            dark
+              ? "bg-emerald-600 hover:bg-emerald-700"
+              : "bg-[#4F6F52] hover:bg-[#37563b]"
+          }`}
         >
           <Icon name="add" className="text-base" />
           {loading ? "Saving…" : "Save Entry"}
@@ -141,10 +136,10 @@ export default function MetricLogForm({ onSaved, onCancel }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className={`px-4 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+          className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all active:scale-95 ${
             dark
               ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-              : "bg-slate-100 hover:bg-slate-200 text-slate-700"
+              : "bg-[#DAD7CD]/50 hover:bg-[#DAD7CD] text-[#4F6F52]"
           }`}
         >
           Cancel

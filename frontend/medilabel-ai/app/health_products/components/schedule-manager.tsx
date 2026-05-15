@@ -3,33 +3,60 @@
 import { useState } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import { Schedule, ScheduleCreate } from "../../src/types/tracking";
-import { Medication } from "../../src/types/health_products";
+import { UserMedication } from "../../src/types/health_products";
 import { createSchedule, deleteSchedule } from "../../src/api/tracking.api";
 import Icon from "../../src/components/icon";
 
 interface Props {
   schedules: Schedule[];
-  medications: Medication[];
+  userMedications: UserMedication[];
   onRefresh: () => void;
 }
 
-export default function ScheduleManager({ schedules, medications, onRefresh }: Props) {
+export default function ScheduleManager({ schedules, userMedications, onRefresh }: Props) {
   const { dark } = useTheme();
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [form, setForm] = useState<Partial<ScheduleCreate>>({
-    start_date: new Date().toISOString().slice(0, 10),
-    frequency: "daily",
-  });
+  const [stockId, setStockId] = useState<number | "">("");
+  const [doseAmount, setDoseAmount] = useState("");
+  const [doseUnit, setDoseUnit] = useState("tablet");
+  const [frequencyPerDay, setFrequencyPerDay] = useState("1");
+  const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 10));
+  const [endDate, setEndDate] = useState("");
+  const [firstDoseTime, setFirstDoseTime] = useState("08:00");
 
-  async function handleSubmit(e: React.FormEvent) {
+  function resetForm() {
+    setStockId("");
+    setDoseAmount("");
+    setDoseUnit("tablet");
+    setFrequencyPerDay("1");
+    setStartDate(new Date().toISOString().slice(0, 10));
+    setEndDate("");
+    setFirstDoseTime("08:00");
+  }
+
+  async function handleSubmit(e: React.SyntheticEvent) {
     e.preventDefault();
-    if (!form.medication_id || !form.frequency || !form.start_date) return;
+    if (!stockId || !doseAmount) return;
+
+    const selected = userMedications.find((m) => m.stock.stock_id === Number(stockId));
+    if (!selected) return;
+
+    const payload: ScheduleCreate = {
+      medication_id: selected.medication.medication_id,
+      stock_id: Number(stockId),
+      dose_amount: Number(doseAmount),
+      dose_unit: doseUnit || "tablet",
+      frequency_per_day: Number(frequencyPerDay),
+      start_date: startDate,
+      end_date: endDate || undefined,
+      next_dose_at: `${startDate}T${firstDoseTime}:00`,
+    };
 
     setSaving(true);
     try {
-      await createSchedule(form as ScheduleCreate);
-      setForm({ start_date: new Date().toISOString().slice(0, 10), frequency: "daily" });
+      await createSchedule(payload);
+      resetForm();
       setShowForm(false);
       onRefresh();
     } finally {
@@ -47,6 +74,13 @@ export default function ScheduleManager({ schedules, medications, onRefresh }: P
       ? "bg-slate-700 border-slate-600 text-white placeholder:text-slate-400"
       : "bg-white border-slate-200 text-slate-900 placeholder:text-slate-400"
   }`;
+
+  function frequencyLabel(n: number) {
+    if (n === 1) return "Once daily";
+    if (n === 2) return "Twice daily";
+    if (n === 3) return "Three times daily";
+    return `${n}× daily`;
+  }
 
   return (
     <div className="space-y-4">
@@ -68,84 +102,125 @@ export default function ScheduleManager({ schedules, medications, onRefresh }: P
       </div>
 
       {showForm && (
-        <form onSubmit={handleSubmit} className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-200"}`}>
-          {medications.length === 0 ? (
+        <form
+          onSubmit={handleSubmit}
+          className={`rounded-xl border p-4 space-y-3 ${dark ? "bg-slate-800 border-slate-700" : "bg-slate-50 border-slate-200"}`}
+        >
+          {userMedications.length === 0 ? (
             <p className={`text-sm ${dark ? "text-amber-400" : "text-amber-600"}`}>
-              Add a medication in Health Products first before scheduling it.
+              Add a medication in My Stock first before scheduling it.
             </p>
           ) : (
             <>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Medication *</label>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    Medication *
+                  </label>
                   <select
                     required
                     className={inputClass}
-                    value={form.medication_id ?? ""}
-                    onChange={(e) => setForm({ ...form, medication_id: Number(e.target.value) })}
+                    value={stockId}
+                    onChange={(e) => setStockId(e.target.value ? Number(e.target.value) : "")}
                   >
                     <option value="">Select medication</option>
-                    {medications.map((m) => (
-                      <option key={m.medication_id} value={m.medication_id}>
-                        {m.name}
+                    {userMedications.map((m) => (
+                      <option key={m.stock.stock_id} value={m.stock.stock_id}>
+                        {m.medication.name}
+                        {m.stock.unit ? ` (${m.stock.unit})` : ""}
                       </option>
                     ))}
                   </select>
                 </div>
+
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Frequency *</label>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    Frequency *
+                  </label>
                   <select
                     required
                     className={inputClass}
-                    value={form.frequency ?? "daily"}
-                    onChange={(e) => setForm({ ...form, frequency: e.target.value })}
+                    value={frequencyPerDay}
+                    onChange={(e) => setFrequencyPerDay(e.target.value)}
                   >
-                    <option value="daily">Daily</option>
-                    <option value="twice_daily">Twice daily</option>
-                    <option value="three_times_daily">Three times daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="as_needed">As needed</option>
+                    <option value="1">Once daily</option>
+                    <option value="2">Twice daily</option>
+                    <option value="3">Three times daily</option>
+                    <option value="4">Four times daily</option>
                   </select>
                 </div>
+
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Start date *</label>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    Dose amount *
+                  </label>
+                  <input
+                    type="number"
+                    required
+                    min={0.1}
+                    step={0.1}
+                    className={inputClass}
+                    placeholder="e.g. 1"
+                    value={doseAmount}
+                    onChange={(e) => setDoseAmount(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    Dose unit
+                  </label>
+                  <input
+                    className={inputClass}
+                    placeholder="tablet"
+                    value={doseUnit}
+                    onChange={(e) => setDoseUnit(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    Start date *
+                  </label>
                   <input
                     type="date"
                     required
                     className={inputClass}
-                    value={form.start_date ?? ""}
-                    onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
                   />
                 </div>
+
                 <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>End date</label>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    First dose time *
+                  </label>
+                  <input
+                    type="time"
+                    required
+                    className={inputClass}
+                    value={firstDoseTime}
+                    onChange={(e) => setFirstDoseTime(e.target.value)}
+                  />
+                </div>
+
+                <div>
+                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>
+                    End date
+                  </label>
                   <input
                     type="date"
                     className={inputClass}
-                    value={form.end_date ?? ""}
-                    onChange={(e) => setForm({ ...form, end_date: e.target.value || undefined })}
-                  />
-                </div>
-                <div>
-                  <label className={`block text-xs font-medium mb-1 ${dark ? "text-slate-300" : "text-slate-600"}`}>Doses remaining</label>
-                  <input
-                    type="number"
-                    min={0}
-                    className={inputClass}
-                    placeholder="e.g. 30"
-                    value={form.doses_remaining ?? ""}
-                    onChange={(e) => setForm({ ...form, doses_remaining: e.target.value ? Number(e.target.value) : undefined })}
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
                   />
                 </div>
               </div>
+
               <button
                 type="submit"
                 disabled={saving}
-                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  dark
-                    ? "bg-indigo-600 text-white hover:bg-indigo-500 disabled:opacity-50"
-                    : "bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50"
-                }`}
+                className="px-4 py-2 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
               >
                 {saving ? "Saving..." : "Save schedule"}
               </button>
@@ -173,8 +248,8 @@ export default function ScheduleManager({ schedules, medications, onRefresh }: P
                 {s.medication_name ?? `Medication #${s.medication_id}`}
               </p>
               <p className={`text-xs mt-0.5 ${dark ? "text-slate-400" : "text-slate-500"}`}>
-                {s.frequency}
-                {s.doses_remaining != null && ` · ${s.doses_remaining} ${s.stock_unit ?? "doses"} left`}
+                {frequencyLabel(s.frequency_per_day)}
+                {` · ${s.dose_amount} ${s.dose_unit ?? "tablet"}`}
                 {s.end_date && ` · Until ${s.end_date}`}
               </p>
             </div>

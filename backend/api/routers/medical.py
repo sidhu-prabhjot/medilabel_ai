@@ -271,3 +271,16 @@ async def get_user_medication_stock(
         .execute()
     )
     return {"data": response.data[0]}
+
+@router.delete("/medications/{medication_id}/stock/{stock_id}", status_code=204)
+@limiter.limit("10/minute")
+async def delete_user_medication_stock(
+    request: Request,
+    medication_id: int,
+    stock_id: int,
+    user_id: UUID = Depends(get_current_user),
+):
+    verify_stock_ownership(stock_id, user_id)
+
+    supabase.table("user_medication_stock").delete().eq("medication_id", medication_id).eq("stock_id", stock_id).eq("user_id", str(user_id)).execute()
+    return Response(status_code=204)

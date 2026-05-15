@@ -1,5 +1,4 @@
 from decimal import Decimal
-from datetime import datetime, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -106,7 +105,8 @@ async def update_body_metric(
 
     update_data = updated_record.model_dump(exclude_unset=True)
     update_data = convert_decimals_to_float(update_data)
-    update_data["updated_at"] = datetime.now(timezone.utc).isoformat()
+    if "recorded_at" in update_data:
+        update_data["recorded_at"] = update_data["recorded_at"].isoformat()
 
     response = (
         supabase.table("body_metrics")

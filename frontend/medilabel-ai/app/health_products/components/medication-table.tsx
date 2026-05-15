@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useTheme } from "../../src/context/theme-context";
 import Icon from "../../src/components/icon";
-import { UserMedication, StockFormValues } from "../../src/types/health_products";
-import { addStock, deleteMedication } from "../../src/api/health_product.api";
+import {
+  UserMedication,
+  StockFormValues,
+} from "../../src/types/health_products";
+import { addStock, deleteStock } from "../../src/api/health_product.api";
 
 interface Props {
   userMedications: UserMedication[];
@@ -57,12 +60,18 @@ function RestockForm({
         dark ? "bg-slate-700/40" : "bg-slate-50"
       }`}
     >
-      <p className={`text-xs font-semibold uppercase tracking-wide ${dark ? "text-slate-400" : "text-slate-500"}`}>
+      <p
+        className={`text-xs font-semibold uppercase tracking-wide ${dark ? "text-slate-400" : "text-slate-500"}`}
+      >
         Add Stock
       </p>
       <div className="grid grid-cols-3 gap-2">
         <div className="flex flex-col gap-1">
-          <label className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>Qty</label>
+          <label
+            className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}
+          >
+            Qty
+          </label>
           <input
             type="number"
             min={0}
@@ -73,7 +82,11 @@ function RestockForm({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>Unit</label>
+          <label
+            className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}
+          >
+            Unit
+          </label>
           <input
             value={unit}
             onChange={(e) => setUnit(e.target.value)}
@@ -82,7 +95,11 @@ function RestockForm({
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>Expiry</label>
+          <label
+            className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}
+          >
+            Expiry
+          </label>
           <input
             type="date"
             value={expirationDate}
@@ -92,7 +109,11 @@ function RestockForm({
         </div>
       </div>
       <div className="flex flex-col gap-1">
-        <label className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}>Notes</label>
+        <label
+          className={`text-xs ${dark ? "text-slate-400" : "text-slate-500"}`}
+        >
+          Notes
+        </label>
         <input
           value={notes}
           onChange={(e) => setNotes(e.target.value)}
@@ -127,12 +148,23 @@ function RestockForm({
 
 // ── Expiry badge helper ────────────────────────────────────────────────────────
 
-function ExpiryBadge({ dateStr, dark }: { dateStr: string | null; dark: boolean }) {
-  if (!dateStr) return <span className={dark ? "text-slate-500" : "text-slate-400"}>—</span>;
+function ExpiryBadge({
+  dateStr,
+  dark,
+}: {
+  dateStr: string | null;
+  dark: boolean;
+}) {
+  if (!dateStr)
+    return (
+      <span className={dark ? "text-slate-500" : "text-slate-400"}>—</span>
+    );
 
   const expiry = new Date(dateStr);
   const today = new Date();
-  const daysUntil = Math.ceil((expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+  const daysUntil = Math.ceil(
+    (expiry.getTime() - today.getTime()) / (1000 * 60 * 60 * 24),
+  );
 
   if (daysUntil < 0) {
     return (
@@ -149,7 +181,9 @@ function ExpiryBadge({ dateStr, dark }: { dateStr: string | null; dark: boolean 
     );
   }
   return (
-    <span className={`text-xs tabular-nums ${dark ? "text-slate-300" : "text-slate-700"}`}>
+    <span
+      className={`text-xs tabular-nums ${dark ? "text-slate-300" : "text-slate-700"}`}
+    >
       {expiry.toLocaleDateString()}
     </span>
   );
@@ -166,10 +200,10 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
   const [restockingId, setRestockingId] = useState<number | null>(null);
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  async function handleDelete(medicationId: number) {
+  async function handleDelete(medicationId: number, stockId: number) {
     setDeletingId(medicationId);
     try {
-      await deleteMedication(medicationId);
+      await deleteStock(medicationId, stockId);
       onRefresh();
     } finally {
       setDeletingId(null);
@@ -180,7 +214,9 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
     return (
       <div className={`flex flex-col items-center gap-2 py-10 ${muted}`}>
         <Icon name="medication" className="text-4xl opacity-40" />
-        <p className="text-sm">No medications yet. Search above to add your first one.</p>
+        <p className="text-sm">
+          No medications yet. Search above to add your first one.
+        </p>
       </div>
     );
   }
@@ -189,11 +225,31 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
     <table className="w-full text-sm">
       <thead>
         <tr className={`border-b text-left ${divider}`}>
-          <th className={`py-2 font-medium text-xs uppercase tracking-wide ${muted}`}>Name</th>
-          <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Type</th>
-          <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Stock</th>
-          <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Expires</th>
-          <th className={`font-medium text-xs uppercase tracking-wide ${muted}`}>Notes</th>
+          <th
+            className={`py-2 font-medium text-xs uppercase tracking-wide ${muted}`}
+          >
+            Name
+          </th>
+          <th
+            className={`font-medium text-xs uppercase tracking-wide ${muted}`}
+          >
+            Type
+          </th>
+          <th
+            className={`font-medium text-xs uppercase tracking-wide ${muted}`}
+          >
+            Stock
+          </th>
+          <th
+            className={`font-medium text-xs uppercase tracking-wide ${muted}`}
+          >
+            Expires
+          </th>
+          <th
+            className={`font-medium text-xs uppercase tracking-wide ${muted}`}
+          >
+            Notes
+          </th>
           <th />
         </tr>
       </thead>
@@ -208,7 +264,9 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
               {/* Main row */}
               <div className="flex items-center gap-3 py-2.5">
                 {/* Name */}
-                <span className={`flex-1 font-medium ${heading}`}>{medication.name}</span>
+                <span className={`flex-1 font-medium ${heading}`}>
+                  {medication.name}
+                </span>
 
                 {/* Brand / Generic badge */}
                 <span
@@ -226,10 +284,14 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                 </span>
 
                 {/* Quantity */}
-                <span className={`tabular-nums text-xs min-w-[4rem] text-right ${dark ? "text-slate-300" : "text-slate-700"}`}>
-                  {stock.quantity != null
-                    ? `${stock.quantity}${stock.unit ? ` ${stock.unit}` : ""}`
-                    : <span className={muted}>—</span>}
+                <span
+                  className={`tabular-nums text-xs min-w-[4rem] text-right ${dark ? "text-slate-300" : "text-slate-700"}`}
+                >
+                  {stock.quantity != null ? (
+                    `${stock.quantity}${stock.unit ? ` ${stock.unit}` : ""}`
+                  ) : (
+                    <span className={muted}>—</span>
+                  )}
                 </span>
 
                 {/* Expiry */}
@@ -238,7 +300,9 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                 </span>
 
                 {/* Notes */}
-                <span className={`hidden md:block max-w-[10rem] truncate text-xs ${muted}`}>
+                <span
+                  className={`hidden md:block max-w-[10rem] truncate text-xs ${muted}`}
+                >
                   {stock.notes || "—"}
                 </span>
 
@@ -246,7 +310,9 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                 <div className="flex items-center gap-1 ml-1">
                   <button
                     onClick={() =>
-                      setRestockingId(restockingId === stock.stock_id ? null : stock.stock_id)
+                      setRestockingId(
+                        restockingId === stock.stock_id ? null : stock.stock_id,
+                      )
                     }
                     title="Add stock"
                     className={`p-1.5 rounded-lg transition-colors ${
@@ -258,7 +324,7 @@ export default function MedicationTable({ userMedications, onRefresh }: Props) {
                     <Icon name="add_box" className="text-base" />
                   </button>
                   <button
-                    onClick={() => handleDelete(medication.medication_id)}
+                    onClick={() => handleDelete(medication.medication_id, stock.stock_id)}
                     disabled={deletingId === medication.medication_id}
                     title="Remove medication"
                     className={`p-1.5 rounded-lg transition-colors disabled:opacity-40 ${

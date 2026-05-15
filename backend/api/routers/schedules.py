@@ -1,4 +1,4 @@
-from datetime import datetime, date, timezone
+from datetime import datetime, date, timedelta, timezone
 from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -24,6 +24,7 @@ def verify_schedule_ownership(schedule_id: int, user_id: UUID):
         .select("schedule_id, user_id")
         .eq("schedule_id", schedule_id)
         .eq("user_id", str(user_id))
+        .is_("deleted_at", "null")
         .execute()
     )
 
@@ -41,6 +42,7 @@ async def get_schedules(request: Request, user_id: UUID = Depends(get_current_us
         supabase.table("user_medication_schedule")
         .select("*")
         .eq("user_id", str(user_id))
+        .is_("deleted_at", "null")
         .execute()
     ).data
 
@@ -89,6 +91,7 @@ async def get_schedules_today(request: Request, user_id: UUID = Depends(get_curr
         .select("*")
         .eq("user_id", str(user_id))
         .lte("start_date", today)
+        .is_("deleted_at", "null")
         .execute()
     ).data
 
@@ -136,23 +139,26 @@ async def get_schedules_today(request: Request, user_id: UUID = Depends(get_curr
         log = logs_by_schedule.get(s["schedule_id"])
         next_dose_at = s.get("next_dose_at")
 
+        was_missed = log["was_missed"] if log else None
+        status = "missed" if was_missed else ("taken" if log else "pending")
+
         is_overdue = (
             next_dose_at is not None
             and datetime.fromisoformat(next_dose_at) < now
-            and (log is None or log["status"] != "taken")
+            and status != "taken"
         )
 
         items.append(TodayDoseItem(
             schedule_id=s["schedule_id"],
             medication_id=s["medication_id"],
             medication_name=medication_names.get(s["medication_id"], "Unknown"),
-            frequency=s["frequency"],
-            doses_per_day=s.get("doses_per_day"),
+            frequency_per_day=s["frequency_per_day"],
+            dose_amount=s["dose_amount"],
+            dose_unit=s.get("dose_unit"),
             next_dose_at=next_dose_at,
-            doses_remaining=s.get("doses_remaining"),
             stock_unit=stock_units.get(s.get("stock_id")),
-            log_id=log["log_id"] if log else None,
-            status=log["status"] if log else "pending",
+            intake_id=log["intake_id"] if log else None,
+            status=status,
             taken_at=log.get("taken_at") if log else None,
             is_overdue=is_overdue,
         ))
@@ -174,6 +180,7 @@ async def get_schedule(
         .select("*")
         .eq("schedule_id", schedule_id)
         .eq("user_id", str(user_id))
+        .is_("deleted_at", "null")
         .execute()
     )
     return {"data": response.data[0]}
@@ -195,20 +202,25 @@ async def create_schedule(
     if not medication.data:
         raise HTTPException(status_code=404, detail="Medication not found")
 
+    row: dict = {
+        "user_id": str(user_id),
+        "medication_id": body.medication_id,
+        "stock_id": body.stock_id,
+        "dose_amount": body.dose_amount,
+        "dose_unit": body.dose_unit or "tablet",
+        "frequency_per_day": body.frequency_per_day,
+        "start_date": body.start_date.isoformat(),
+    }
+    if body.interval_hours is not None:
+        row["interval_hours"] = body.interval_hours
+    if body.end_date is not None:
+        row["end_date"] = body.end_date.isoformat()
+    if body.next_dose_at is not None:
+        row["next_dose_at"] = body.next_dose_at.isoformat()
+
     response = (
         supabase.table("user_medication_schedule")
-        .insert({
-            "user_id": str(user_id),
-            "medication_id": body.medication_id,
-            "stock_id": body.stock_id,
-            "frequency": body.frequency,
-            "interval_hours": body.interval_hours,
-            "doses_per_day": body.doses_per_day,
-            "start_date": body.start_date.isoformat(),
-            "end_date": body.end_date.isoformat() if body.end_date else None,
-            "doses_remaining": body.doses_remaining,
-            "next_dose_at": body.next_dose_at.isoformat() if body.next_dose_at else None,
-        })
+        .insert(row)
         .execute()
     )
     return {"data": response.data[0]}
@@ -254,7 +266,9 @@ async def delete_schedule(
 ):
     verify_schedule_ownership(schedule_id, user_id)
 
-    supabase.table("user_medication_schedule").delete().eq("schedule_id", schedule_id).eq("user_id", str(user_id)).execute()
+    supabase.table("user_medication_schedule").update(
+        {"deleted_at": datetime.now(timezone.utc).isoformat()}
+    ).eq("schedule_id", schedule_id).eq("user_id", str(user_id)).execute()
     return Response(status_code=204)
 
 
@@ -270,7 +284,7 @@ async def log_dose(
 
     schedule = (
         supabase.table("user_medication_schedule")
-        .select("medication_id, doses_remaining, stock_id")
+        .select("frequency_per_day, next_dose_at, dose_amount, stock_id")
         .eq("schedule_id", schedule_id)
         .execute()
     ).data[0]
@@ -282,16 +296,37 @@ async def log_dose(
         .insert({
             "schedule_id": schedule_id,
             "user_id": str(user_id),
-            "medication_id": schedule["medication_id"],
-            "status": body.status,
+            "dose_amount": int(schedule["dose_amount"]),
+            "was_missed": body.was_missed,
             "taken_at": taken_at.isoformat(),
             "notes": body.notes,
         })
         .execute()
     )
 
-    if body.status == "taken" and schedule.get("doses_remaining") is not None:
-        new_count = max(0, schedule["doses_remaining"] - 1) #prevents going negative
-        supabase.table("user_medication_schedule").update({"doses_remaining": new_count}).eq("schedule_id", schedule_id).execute()
+    if not body.was_missed:
+        current_next = schedule.get("next_dose_at")
+        frequency_per_day = schedule.get("frequency_per_day", 1)
+        interval_hours = 24 // frequency_per_day
+        if current_next:
+            base = datetime.fromisoformat(current_next)
+            if base.tzinfo is None:
+                base = base.replace(tzinfo=timezone.utc)
+            next_dose = (base + timedelta(hours=interval_hours)).isoformat()
+            supabase.table("user_medication_schedule").update({"next_dose_at": next_dose}).eq("schedule_id", schedule_id).execute()
+
+        stock_id = schedule.get("stock_id")
+        dose_amount = int(schedule["dose_amount"])
+        if stock_id:
+            stock = (
+                supabase.table("user_medication_stock")
+                .select("quantity")
+                .eq("stock_id", stock_id)
+                .execute()
+            ).data
+            if stock and stock[0]["quantity"] is not None and stock[0]["quantity"] >= dose_amount:
+                supabase.table("user_medication_stock").update(
+                    {"quantity": stock[0]["quantity"] - dose_amount}
+                ).eq("stock_id", stock_id).execute()
 
     return {"data": response.data[0]}

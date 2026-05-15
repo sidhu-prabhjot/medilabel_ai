@@ -28,11 +28,16 @@ export const addMedication = async (payload: {
   name: string;
   tty: string;
 }): Promise<Medication> => {
-  const response = await api.post<ApiResponse<Medication[]>>("/api/medications", payload);
-  return response.data.data[0];
+  const response = await api.post<ApiResponse<Medication>>(
+    "/api/medications",
+    payload,
+  );
+  return response.data.data;
 };
 
-export const getMedication = async (medicationId: number): Promise<Medication> => {
+export const getMedication = async (
+  medicationId: number,
+): Promise<Medication> => {
   const response = await api.get<ApiResponse<Medication>>(
     `/api/medications/${medicationId}`,
   );
@@ -49,15 +54,24 @@ export const addStock = async (
   medicationId: number,
   stock: StockFormValues,
 ): Promise<StockRecord> => {
-  const response = await api.post<ApiResponse<StockRecord[]>>(
+  const response = await api.post<ApiResponse<StockRecord>>(
     `/api/medications/${medicationId}/stock`,
     stock,
   );
-  return response.data.data[0];
+  return response.data.data;
+};
+
+export const deleteStock = async (
+  medicationId: number,
+  stockId: number,
+): Promise<void> => {
+  await api.delete(`/api/medications/${medicationId}/stock/${stockId}`);
 };
 
 export const getUserMedications = async (): Promise<StockRecord[]> => {
-  const response = await api.get<ApiResponse<StockRecord[]>>("/api/user/medications");
+  const response = await api.get<ApiResponse<StockRecord[]>>(
+    "/api/user/medications",
+  );
   return response.data.data;
 };
 
@@ -68,8 +82,13 @@ export const getSymptoms = async (): Promise<SymptomLog[]> => {
   return response.data.data;
 };
 
-export const addSymptom = async (payload: SymptomLogCreate): Promise<SymptomLog> => {
-  const response = await api.post<ApiResponse<SymptomLog[]>>("/api/symptoms", payload);
+export const addSymptom = async (
+  payload: SymptomLogCreate,
+): Promise<SymptomLog> => {
+  const response = await api.post<ApiResponse<SymptomLog[]>>(
+    "/api/symptoms",
+    payload,
+  );
   return response.data.data[0];
 };
 
@@ -78,9 +97,14 @@ export const deleteSymptom = async (symptomId: string): Promise<void> => {
 };
 
 // Mark a symptom as resolved via PUT /api/symptoms/{id}
-export const resolveSymptom = async (symptomId: string): Promise<SymptomLog> => {
-  const response = await api.put<ApiResponse<SymptomLog>>(`/api/symptoms/${symptomId}`, {
-    is_resolved: true,
-  });
+export const resolveSymptom = async (
+  symptomId: string,
+): Promise<SymptomLog> => {
+  const response = await api.put<ApiResponse<SymptomLog>>(
+    `/api/symptoms/${symptomId}`,
+    {
+      is_resolved: true,
+    },
+  );
   return response.data.data;
 };

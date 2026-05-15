@@ -53,16 +53,15 @@ export interface Schedule {
   schedule_id: number;
   user_id: string;
   medication_id: number;
-  stock_id: number | null;
-  frequency: string;
+  stock_id: number;
+  dose_amount: number;
+  dose_unit: string | null;
+  frequency_per_day: number;
   interval_hours: number | null;
-  doses_per_day: number | null;
   start_date: string;
   end_date: string | null;
-  doses_remaining: number | null;
   next_dose_at: string | null;
   created_at: string;
-  updated_at: string | null;
   medication_name: string | null;
   stock_unit: string | null;
 }
@@ -70,13 +69,13 @@ export interface Schedule {
 // Sent to POST /api/schedules
 export interface ScheduleCreate {
   medication_id: number;
-  stock_id?: number;
-  frequency: string;
+  stock_id: number;
+  dose_amount: number;
+  dose_unit?: string;
+  frequency_per_day: number;
   interval_hours?: number;
-  doses_per_day?: number;
   start_date: string;
   end_date?: string;
-  doses_remaining?: number;
   next_dose_at?: string;
 }
 
@@ -85,12 +84,12 @@ export interface TodayDoseItem {
   schedule_id: number;
   medication_id: number;
   medication_name: string;
-  frequency: string;
-  doses_per_day: number | null;
+  frequency_per_day: number;
+  dose_amount: number;
+  dose_unit: string | null;
   next_dose_at: string | null;
-  doses_remaining: number | null;
   stock_unit: string | null;
-  log_id: number | null;
+  intake_id: number | null;
   status: "taken" | "missed" | "pending";
   taken_at: string | null;
   is_overdue: boolean;
@@ -99,7 +98,8 @@ export interface TodayDoseItem {
 // Sent to POST /api/schedules/:id/log
 export interface IntakeLogCreate {
   schedule_id: number;
-  status: "taken" | "missed";
+  dose_amount: number;
+  was_missed: boolean;
   taken_at?: string;
   notes?: string;
 }

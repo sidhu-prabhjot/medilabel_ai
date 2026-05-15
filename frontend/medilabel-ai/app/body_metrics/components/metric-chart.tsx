@@ -43,16 +43,16 @@ export default function MetricChart({ metrics }: Props) {
       weight: m.weight_kg,
     }));
 
-  const tickColor = dark ? "#94a3b8" : "#64748b"; // slate-400 / slate-500
-  const gridColor = dark ? "#334155" : "#e2e8f0"; // slate-700 / slate-200
+  const tickColor = dark ? "#94a3b8" : "#A3B18A";
+  const gridColor = dark ? "#334155" : "#DAD7CD";
 
   return (
     <ResponsiveContainer width="100%" height={220}>
       <AreaChart data={chartData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
         <defs>
           <linearGradient id="weightGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.25} />
-            <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
+            <stop offset="5%" stopColor="#4F6F52" stopOpacity={0.25} />
+            <stop offset="95%" stopColor="#4F6F52" stopOpacity={0} />
           </linearGradient>
         </defs>
 
@@ -75,21 +75,21 @@ export default function MetricChart({ metrics }: Props) {
         <Tooltip
           contentStyle={{
             backgroundColor: dark ? "#1e293b" : "#ffffff",
-            border: `1px solid ${dark ? "#334155" : "#e2e8f0"}`,
+            border: `1px solid ${dark ? "#334155" : "#DAD7CD"}`,
             borderRadius: "8px",
             fontSize: "12px",
             color: dark ? "#f8fafc" : "#0f172a",
           }}
-          formatter={(value: number) => [`${value} kg`, "Weight"]}
+          formatter={(value) => [`${value} kg`, "Weight"]}
         />
 
         <Area
           type="monotone"
           dataKey="weight"
-          stroke="#6366f1"
+          stroke="#4F6F52"
           strokeWidth={2}
           fill="url(#weightGradient)"
-          dot={{ fill: "#6366f1", r: 3 }}
+          dot={{ fill: "#4F6F52", r: 3 }}
           activeDot={{ r: 5 }}
         />
       </AreaChart>

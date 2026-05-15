@@ -64,7 +64,7 @@ export default function Sidebar() {
         <SidebarItem icon="dashboard" label="Dashboard" href="/dashboard" />
         <SidebarItem
           icon="pill"
-          label="Health Products"
+          label="Medication"
           href="/health_products"
         />
         <SidebarItem icon="exercise" label="Workouts" href="/workouts" />
@@ -73,7 +73,6 @@ export default function Sidebar() {
           label="Body Metrics"
           href="/body_metrics"
         />
-        <SidebarItem icon="symptoms" label="Symptoms" href="/symptoms" />
         <SidebarItem icon="settings" label="Settings" href="/settings" />
       </nav>
 
