@@ -7,10 +7,11 @@ export default function Input({ className = "", ...props }: InputProps) {
       className={`
         block w-full rounded-md
         px-3 py-1.5
-        text-base
+        text-base text-[#1a1c1a]
         border border-gray-300
         outline-none
-        focus:ring-2 focus:ring-indigo-500
+        placeholder:text-gray-400
+        focus:ring-2 focus:ring-[#37563b]
         ${className}
       `}
     />

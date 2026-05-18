@@ -12,9 +12,9 @@ export default function Button({
       {...props}
       className={`
         flex w-full justify-center rounded-md
-        bg-indigo-600 px-3 py-1.5
+        bg-[#37563b] px-3 py-1.5
         text-sm font-semibold text-white
-        hover:bg-indigo-500
+        hover:bg-[#4f6f52]
         transition
         ${className}
       `}

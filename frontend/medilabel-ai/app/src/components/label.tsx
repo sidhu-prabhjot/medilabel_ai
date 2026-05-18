@@ -1,3 +1,7 @@
+"use client";
+
+import { useTheme } from "../context/theme-context";
+
 export default function Label({
   children,
   htmlFor,
@@ -5,10 +9,11 @@ export default function Label({
   children: React.ReactNode;
   htmlFor?: string;
 }) {
+  const { dark } = useTheme();
   return (
     <label
       htmlFor={htmlFor}
-      className="block text-sm font-medium text-gray-900 dark:text-gray-100"
+      className={`block text-sm font-semibold ${dark ? "text-white" : "text-[#1a1c1a]"}`}
     >
       {children}
     </label>
