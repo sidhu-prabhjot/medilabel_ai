@@ -39,6 +39,13 @@ backend/requirements_new.txt
 
 CLAUDE.md
 
+*strategy.md
+
 design.md
 
 .claude/
+
+/supabase
+
+# Schema dumps
+*_schema.sql
