@@ -43,3 +43,4 @@ class RefreshRequest(BaseModel):
 
 class MeResponse(BaseModel):
     email: str
+    user_id: str

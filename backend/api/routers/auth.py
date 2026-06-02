@@ -6,6 +6,7 @@ from api.auth.hash import hash_password, verify_password
 from api.auth.jwt import create_access_token, create_refresh_token, decode_access_token, REFRESH_TOKEN_EXPIRE_DAYS, ACCESS_TOKEN_EXPIRE_MINUTES
 from api.db.supabase import supabase
 from api.auth.auth import get_current_user
+from api.schemas.common import DataResponse
 from api.schemas.user import UserCreate, UserLogin, MeResponse
 from postgrest.exceptions import APIError as PostgrestAPIError
 
@@ -143,14 +144,14 @@ def refresh(request: Request, response: Response):
 # Me
 # ------------------------------------------------------------------
 
-@router.get("/me", response_model=MeResponse, summary="Get current user")
+@router.get("/me", response_model=DataResponse[MeResponse], summary="Get current user")
 def me(current_user_id=Depends(get_current_user)):
     result = supabase.table("users").select("email").eq("id", str(current_user_id)).execute()
 
     if not result.data:
         raise HTTPException(status_code=404, detail="User not found")
 
-    return MeResponse(email=result.data[0]["email"])
+    return {"data": MeResponse(email=result.data[0]["email"], user_id=str(current_user_id))}
 
 
 # ------------------------------------------------------------------

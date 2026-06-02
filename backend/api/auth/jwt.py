@@ -32,4 +32,7 @@ def create_refresh_token(data: dict):
 
 
 def decode_access_token(token: str):
-    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    if payload.get("type") == "refresh":
+        raise jwt.InvalidTokenError("Refresh token cannot be used as access token")
+    return payload

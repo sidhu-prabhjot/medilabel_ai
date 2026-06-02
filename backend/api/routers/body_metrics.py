@@ -93,6 +93,24 @@ async def get_latest_body_metric(request: Request, user_id: UUID = Depends(get_c
     return {"data": response.data[0]}
 
 
+@router.get("/body-metrics/{metric_id}", response_model=DataResponse[BodyMetricResponse])
+@limiter.limit("30/minute")
+async def get_body_metric(
+    request: Request,
+    metric_id: int,
+    user_id: UUID = Depends(get_current_user),
+):
+    verify_metric_ownership(metric_id, user_id)
+    response = (
+        supabase.table("body_metrics")
+        .select("*")
+        .eq("id", metric_id)
+        .eq("user_id", str(user_id))
+        .execute()
+    )
+    return {"data": response.data[0]}
+
+
 @router.put("/body-metrics/{metric_id}", response_model=DataResponse[BodyMetricResponse])
 @limiter.limit("15/minute")
 async def update_body_metric(

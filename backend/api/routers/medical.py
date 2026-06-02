@@ -87,6 +87,24 @@ async def add_symptom_log(
     return {"data": response.data[0]}
 
 
+@router.get("/symptoms/{symptom_id}", response_model=DataResponse[SymptomLogResponse])
+@limiter.limit("30/minute")
+async def get_symptom_log(
+    request: Request,
+    symptom_id: str,
+    user_id: UUID = Depends(get_current_user),
+):
+    verify_symptom_ownership(symptom_id, user_id)
+    response = (
+        supabase.table("symptom_logs")
+        .select("*")
+        .eq("symptom_id", symptom_id)
+        .eq("user_id", str(user_id))
+        .execute()
+    )
+    return {"data": response.data[0]}
+
+
 @router.put("/symptoms/{symptom_id}", response_model=DataResponse[SymptomLogResponse])
 @limiter.limit("15/minute")
 async def update_symptom_log(
