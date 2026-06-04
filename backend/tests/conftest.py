@@ -5,6 +5,7 @@ import os
 import pytest
 from fastapi.testclient import TestClient
 from supabase import create_client
+from postgrest.exceptions import APIError as PostgrestAPIError
 
 from api.main import app
 from tests.factories import user_factory
@@ -40,7 +41,14 @@ def _delete_user_records(admin_db, user_id: str) -> None:
         "refresh_tokens",
     ]
     for table in child_tables:
-        admin_db.table(table).delete().eq("user_id", user_id).execute()
+        try:
+            admin_db.table(table).delete().eq("user_id", user_id).execute()
+        except PostgrestAPIError as exc:
+            # PGRST205 = table not found in schema cache.
+            # 42703   = column not found (e.g. workout_exercises has no user_id —
+            #           those rows are cleaned up transitively via the session FK).
+            if exc.code not in ("PGRST205", "42703"):
+                raise
 
 
 @pytest.fixture(scope="session")

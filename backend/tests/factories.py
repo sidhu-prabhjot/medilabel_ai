@@ -11,10 +11,10 @@ def symptom_factory(**overrides) -> dict:
 
 
 def medication_factory(**overrides) -> dict:
-    # rxcui must be unique per test run — no unique-constraint collisions across runs.
-    # tty must be one of "BN", "SBD", "SCD" (backend validates this).
-    rxcui = f"test_{uuid.uuid4().hex[:8]}"
-    return {"rxcui": rxcui, "name": "ibuprofen", "tty": "SBD", **overrides}
+    # Both rxcui and name must be unique — medications table has a unique constraint
+    # on name as well as rxcui, so hardcoding "ibuprofen" causes 23505 on the second run.
+    uid = uuid.uuid4().hex[:8]
+    return {"rxcui": f"test_{uid}", "name": f"test_drug_{uid}", "tty": "SBD", **overrides}
 
 
 def stock_factory(**overrides) -> dict:

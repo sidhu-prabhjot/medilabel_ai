@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta, timezone
 import jwt
 import os
+import uuid
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -27,7 +28,9 @@ def create_access_token(data: dict, expires_delta: timedelta = None):
 def create_refresh_token(data: dict):
     to_encode = data.copy()
     expire = datetime.now(timezone.utc) + timedelta(days=REFRESH_TOKEN_EXPIRE_DAYS)
-    to_encode.update({"exp": expire, "type": "refresh"})
+    # jti (JWT ID) ensures uniqueness even when multiple tokens are issued for the
+    # same user within the same second — prevents unique constraint violations on storage.
+    to_encode.update({"exp": expire, "type": "refresh", "jti": str(uuid.uuid4())})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 

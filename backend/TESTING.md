@@ -61,9 +61,26 @@ pytest --cov=api --cov-report=term-missing
 
 ## What each test file covers
 
+### Unit tests
+
 | File | Tests |
 |------|-------|
 | `tests/unit/test_jwt.py` | Token roundtrip, expiry, tampering, refresh-as-access rejection |
 | `tests/unit/test_schemas.py` | Password validator rejects weak passwords, accepts valid ones |
 
-Integration tests (`tests/integration/`) are added in Phase 2 and require the test database.
+### Integration tests
+
+Require a live Supabase test project via `.env.test`. Run with `pytest tests/integration/`.
+
+| File | Tests |
+|------|-------|
+| `tests/integration/test_auth.py` | Signup/login set cookies, `/me` returns email, wrong password → 401, logout invalidates session |
+| `tests/integration/test_symptoms.py` | Create + list happy path; IDOR: list isolation, GET/DELETE cross-user → 404 |
+| `tests/integration/test_body_metrics.py` | Create + list happy path; IDOR: list isolation, GET/PUT cross-user → 404 |
+| `tests/integration/test_medical.py` | Medication add; RxNav search with mock (success + 503 degradation) |
+| `tests/integration/test_schedules.py` | Dose log decrements stock; IDOR: POST log cross-user → 404 |
+| `tests/integration/test_plans.py` | Activating plan B deactivates plan A; IDOR: PATCH activate cross-user → 404 |
+| `tests/integration/test_security.py` | All protected endpoints → 401 unauthenticated; expired/tampered/refresh tokens → 401 |
+| `tests/integration/test_known_bugs.py` | `xfail(strict=True)` markers for confirmed API inconsistencies |
+
+> **Rate limiting** is disabled when `ENVIRONMENT=test` (set in `.env.test`), so rapid fixture user creation never hits the 3/minute signup cap.
